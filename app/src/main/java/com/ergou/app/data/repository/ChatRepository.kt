@@ -15,6 +15,8 @@ interface ChatRepository {
     fun getMessages(sessionId: Long): Flow<List<MessageEntity>>
     suspend fun getMessagesOnce(sessionId: Long): List<MessageEntity>
     suspend fun saveMessage(sessionId: Long, role: String, content: String): Long
+    suspend fun deleteMessage(messageId: Long)
+    suspend fun updateMessageFeedback(messageId: Long, feedback: Int?)
 
     // AI对话
     fun sendMessage(sessionId: Long, userContent: String): Flow<String>

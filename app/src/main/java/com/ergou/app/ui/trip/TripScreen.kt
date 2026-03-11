@@ -3,6 +3,9 @@ package com.ergou.app.ui.trip
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.ui.window.DialogProperties
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -16,6 +19,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,11 +31,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.window.Dialog
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -40,6 +46,8 @@ import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -207,15 +215,10 @@ fun TripScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
-            if (uiState.isLoggedIn) {
+            if (uiState.isLoggedIn && uiState.selectedTrip == null) {
                 FloatingActionButton(onClick = {
-                    if (uiState.selectedTrip != null) {
-                        editingItem = null
-                        showItemForm = true
-                    } else {
-                        editingTrip = null
-                        showTripForm = true
-                    }
+                    editingTrip = null
+                    showTripForm = true
                 }) {
                     Icon(Icons.Default.Add, contentDescription = "添加")
                 }
@@ -246,7 +249,11 @@ fun TripScreen(
                         editingItem = item
                         showItemForm = true
                     },
-                    onDeleteTrip = { viewModel.showConfirmDeleteTrip(uiState.selectedTrip!!) }
+                    onDeleteTrip = { viewModel.showConfirmDeleteTrip(uiState.selectedTrip!!) },
+                    onAddItem = {
+                        editingItem = null
+                        showItemForm = true
+                    }
                 )
             } else if (uiState.trips.isEmpty()) {
                 Column(
@@ -299,17 +306,18 @@ fun TripScreen(
     if (showItemForm && uiState.selectedTrip != null) {
         val tripId = uiState.selectedTrip!!.id
         val tripCurrency = uiState.selectedTrip!!.currency
-        ItemFormBottomSheet(
+        val context = LocalContext.current
+        ItemFormDialog(
             item = editingItem,
             tripCurrency = tripCurrency,
             isUploading = editingItem?.let { it.id in uiState.uploadingItemIds } ?: false,
             viewModel = viewModel,
             onDismiss = { showItemForm = false; editingItem = null },
-            onSave = { type, desc, amount, date, itemCurrency, status, notes ->
+            onSave = { type, desc, amount, date, itemCurrency, status, notes, pendingPhotos ->
                 if (editingItem != null) {
                     viewModel.updateItem(tripId, editingItem!!.id, type, desc, amount, date, status, notes)
                 } else {
-                    viewModel.addItem(tripId, type, desc, amount ?: 0.0, date, status, notes, itemCurrency)
+                    viewModel.addItem(tripId, type, desc, amount ?: 0.0, date, status, notes, itemCurrency, pendingPhotos, context)
                 }
                 showItemForm = false
                 editingItem = null
@@ -503,7 +511,8 @@ fun TripDetail(
     uiState: TripUiState,
     viewModel: TripViewModel,
     onItemClick: (NextTripItem) -> Unit,
-    onDeleteTrip: () -> Unit
+    onDeleteTrip: () -> Unit,
+    onAddItem: () -> Unit = {}
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -583,6 +592,16 @@ fun TripDetail(
 
             // Bottom spacer for FAB + summary bar
             item(key = "bottom_spacer") { Spacer(modifier = Modifier.height(120.dp)) }
+        }
+
+        // FAB above summary bar
+        FloatingActionButton(
+            onClick = onAddItem,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 16.dp, bottom = 72.dp)
+        ) {
+            Icon(Icons.Default.Add, contentDescription = "添加事项")
         }
 
         // Bottom summary bar
@@ -674,9 +693,16 @@ fun SwipeToDismissItemRow(
                 .padding(vertical = 10.dp)
         ) {
             TripItemRow(item = item, currency = currency)
-            // Inline photo thumbnails
-            if (item.photos.isNotEmpty() || isUploading) {
-                ItemPhotoRow(item = item, isUploading = isUploading, viewModel = viewModel)
+            // Inline photo thumbnails (view-only, no add/delete)
+            if (item.photos.isNotEmpty()) {
+                LazyRow(
+                    modifier = Modifier.padding(start = 40.dp, end = 4.dp, top = 6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(item.photos, key = { it.id }) { photo ->
+                        PhotoThumbnail(photo = photo)
+                    }
+                }
             }
         }
     }
@@ -840,26 +866,28 @@ fun ItemPhotoRow(
 }
 
 @Composable
-fun PhotoThumbnail(photo: NextTripItemPhoto, onDelete: () -> Unit, size: Int = 56) {
-    Box(modifier = Modifier.size(size.dp)) {
+fun PhotoThumbnail(photo: NextTripItemPhoto, onDelete: (() -> Unit)? = null, onClick: (() -> Unit)? = null, size: Int = 56) {
+    Box(modifier = Modifier.size(size.dp).padding(top = 4.dp, end = 4.dp)) {
         AsyncImage(
             model = "${NextApiService.BASE_URL}/api/uploads/${photo.storagePath}",
             contentDescription = null,
             modifier = Modifier
                 .fillMaxSize()
-                .clip(RoundedCornerShape(8.dp)),
+                .clip(RoundedCornerShape(8.dp))
+                .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier),
             contentScale = ContentScale.Crop
         )
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .offset(x = 4.dp, y = (-4).dp)
-                .size(18.dp)
-                .background(Color.Black.copy(alpha = 0.6f), CircleShape)
-                .clickable { onDelete() },
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(Icons.Default.Close, contentDescription = "删除照片", tint = Color.White, modifier = Modifier.size(10.dp))
+        if (onDelete != null) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .size(20.dp)
+                    .background(Color.Black.copy(alpha = 0.6f), CircleShape)
+                    .clickable { onDelete() },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(Icons.Default.Close, contentDescription = "删除照片", tint = Color.White, modifier = Modifier.size(12.dp))
+            }
         }
     }
 }
@@ -978,17 +1006,17 @@ fun TripFormDialog(
     }
 }
 
-// ── Item Form Bottom Sheet (redesigned) ──
+// ── Item Form Dialog (redesigned from BottomSheet) ──
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun ItemFormBottomSheet(
+fun ItemFormDialog(
     item: NextTripItem?,
     tripCurrency: String,
     isUploading: Boolean,
     viewModel: TripViewModel,
     onDismiss: () -> Unit,
-    onSave: (type: String, desc: String, amount: Double?, date: String?, currency: String?, reimburseStatus: String?, notes: String?) -> Unit,
+    onSave: (type: String, desc: String, amount: Double?, date: String?, currency: String?, reimburseStatus: String?, notes: String?, pendingPhotos: List<Uri>) -> Unit,
     onDelete: (() -> Unit)?
 ) {
     val isEdit = item != null
@@ -1002,323 +1030,419 @@ fun ItemFormBottomSheet(
     var analysisText by remember { mutableStateOf("") }
     var showDatePicker by remember { mutableStateOf(false) }
     var currencyExpanded by remember { mutableStateOf(false) }
+    var previewImageModel by remember { mutableStateOf<Any?>(null) }
+    var notesExpanded by remember { mutableStateOf(false) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+
+    // Pending photos for new items (not yet uploaded)
+    var pendingPhotos by remember { mutableStateOf<List<Uri>>(emptyList()) }
+    // Cached bytes for analysis (read immediately when picked, so no permission issues)
+    var pendingPhotoBytes by remember { mutableStateOf<List<ByteArray>>(emptyList()) }
 
     val context = LocalContext.current
     val fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    // Photo pickers for the bottom sheet
+    // Analysis state
+    val analysisState by viewModel.analysisState.collectAsState()
+
+    // Auto-fill from analysis result
+    LaunchedEffect(analysisState.preview) {
+        analysisState.preview?.let { preview ->
+            if (preview.merchant.isNotBlank()) description = TextFieldValue(preview.merchant)
+            if (preview.totalAmount > 0) {
+                amount = if (preview.totalAmount == preview.totalAmount.toLong().toDouble()) {
+                    preview.totalAmount.toLong().toString()
+                } else {
+                    "%.2f".format(preview.totalAmount)
+                }
+            }
+            if (preview.currency.isNotBlank()) currency = preview.currency
+            preview.date?.let {
+                try { selectedDate = LocalDate.parse(it) } catch (_: Exception) {}
+            }
+        }
+    }
+
+    // Clear analysis state when dialog opens
+    LaunchedEffect(Unit) { viewModel.clearAnalysis() }
+
+    // Photo pickers
     var showPhotoSourceDialog by remember { mutableStateOf(false) }
     var cameraUri by remember { mutableStateOf<Uri?>(null) }
 
     val pickMedia = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        uri?.let { item?.let { itm -> viewModel.uploadItemPhoto(itm.id, it, context) } }
+        uri?.let {
+            if (isEdit) {
+                viewModel.uploadItemPhoto(item!!.id, it, context)
+            } else {
+                // Read bytes immediately while we have permission
+                val bytes = try {
+                    context.contentResolver.openInputStream(it)?.use { s -> s.readBytes() }
+                } catch (_: Exception) { null }
+                if (bytes != null && bytes.isNotEmpty()) {
+                    pendingPhotos = pendingPhotos + it
+                    pendingPhotoBytes = pendingPhotoBytes + bytes
+                }
+            }
+        }
     }
 
     val takePicture = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
         if (success) {
-            cameraUri?.let { uri -> item?.let { itm -> viewModel.uploadItemPhoto(itm.id, uri, context) } }
+            cameraUri?.let { uri ->
+                if (isEdit) {
+                    viewModel.uploadItemPhoto(item!!.id, uri, context)
+                } else {
+                    val bytes = try {
+                        context.contentResolver.openInputStream(uri)?.use { s -> s.readBytes() }
+                    } catch (_: Exception) { null }
+                    pendingPhotos = pendingPhotos + uri
+                    if (bytes != null) pendingPhotoBytes = pendingPhotoBytes + bytes
+                }
+            }
         }
     }
 
     val currencies = listOf("CAD" to "CAD", "CNY" to "CNY", "USD" to "USD", "HKD" to "HKD")
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState
-    ) {
-        Column(
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp)
-                .navigationBarsPadding()
+                .fillMaxHeight(0.9f),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
-            // Type selector (compact horizontal scroll)
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                items(ITEM_TYPES) { (key, label) ->
-                    FilterChip(
-                        selected = type == key,
-                        onClick = { type = key },
-                        label = { Text("${typeToEmoji(key)} $label", style = MaterialTheme.typography.labelSmall) }
+            Column(modifier = Modifier.fillMaxSize()) {
+                // Header
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 20.dp, end = 8.dp, top = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        if (isEdit) "编辑费用" else "添加费用",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
                     )
+                    IconButton(onClick = onDismiss) {
+                        Icon(Icons.Default.Close, contentDescription = "关闭")
+                    }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                // Scrollable content
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 20.dp)
+                ) {
+                    Spacer(modifier = Modifier.height(8.dp))
 
-            // Description
-            Text("描述", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(modifier = Modifier.height(4.dp))
-            OutlinedTextField(
-                value = description,
-                onValueChange = { description = it },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
-            )
+                    // Type selector
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(ITEM_TYPES) { (key, label) ->
+                            FilterChip(
+                                selected = type == key,
+                                onClick = { type = key },
+                                label = { Text("${typeToEmoji(key)} $label", style = MaterialTheme.typography.labelSmall) }
+                            )
+                        }
+                    }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-            // Amount + Currency side by side
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text("金额", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    // Description
+                    Text("标题", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(modifier = Modifier.height(4.dp))
                     OutlinedTextField(
-                        value = amount,
-                        onValueChange = { amount = it },
+                        value = description,
+                        onValueChange = { description = it },
                         singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        modifier = Modifier.fillMaxWidth(),
+                        textStyle = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 40.dp),
                         shape = RoundedCornerShape(12.dp)
                     )
-                }
-                Column(modifier = Modifier.width(120.dp)) {
-                    Text("币种", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    ExposedDropdownMenuBox(
-                        expanded = currencyExpanded,
-                        onExpandedChange = { currencyExpanded = it }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Amount + Currency (compact)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         OutlinedTextField(
-                            value = currency,
-                            onValueChange = {},
-                            readOnly = true,
+                            value = amount,
+                            onValueChange = { amount = it },
                             singleLine = true,
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = currencyExpanded) },
-                            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
+                            label = { Text("金额", style = MaterialTheme.typography.bodySmall) },
+                            textStyle = MaterialTheme.typography.bodySmall,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                            modifier = Modifier.weight(1f).heightIn(min = 40.dp),
                             shape = RoundedCornerShape(12.dp)
                         )
-                        ExposedDropdownMenu(
+                        ExposedDropdownMenuBox(
                             expanded = currencyExpanded,
-                            onDismissRequest = { currencyExpanded = false }
+                            onExpandedChange = { currencyExpanded = it },
+                            modifier = Modifier.width(100.dp)
                         ) {
-                            currencies.forEach { (code, display) ->
-                                DropdownMenuItem(
-                                    text = { Text(display) },
-                                    onClick = {
-                                        currency = code
-                                        currencyExpanded = false
-                                    }
-                                )
+                            OutlinedTextField(
+                                value = currency,
+                                onValueChange = {},
+                                readOnly = true,
+                                singleLine = true,
+                                label = { Text("币种", style = MaterialTheme.typography.bodySmall) },
+                                textStyle = MaterialTheme.typography.bodySmall,
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = currencyExpanded) },
+                                modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable).fillMaxWidth().heightIn(min = 40.dp),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                            ExposedDropdownMenu(
+                                expanded = currencyExpanded,
+                                onDismissRequest = { currencyExpanded = false }
+                            ) {
+                                currencies.forEach { (code, display) ->
+                                    DropdownMenuItem(
+                                        text = { Text(display) },
+                                        onClick = {
+                                            currency = code
+                                            currencyExpanded = false
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
-                }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-            // Date
-            Text("日期", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(modifier = Modifier.height(4.dp))
-            Surface(
-                modifier = Modifier.fillMaxWidth().clickable { showDatePicker = true },
-                shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
-            ) {
-                Text(
-                    selectedDate?.format(fmt) ?: "选择日期",
-                    modifier = Modifier.padding(16.dp),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (selectedDate != null) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Reimburse status
-            Text("报销状态", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(modifier = Modifier.height(8.dp))
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                REIMBURSE_STATUSES.forEach { (key, label) ->
-                    val isSelected = reimburseStatus == key
-                    val chipColor = reimburseColor(key)
-                    val chipBg = reimburseBgColor(key)
-                    FilterChip(
-                        selected = isSelected,
-                        onClick = { reimburseStatus = key },
-                        label = {
-                            Text(
-                                label,
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                            )
-                        },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = chipBg,
-                            selectedLabelColor = chipColor
-                        ),
-                        border = if (isSelected) BorderStroke(1.5.dp, chipColor) else FilterChipDefaults.filterChipBorder(enabled = true, selected = false)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Notes
-            Text("备注", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(modifier = Modifier.height(4.dp))
-            OutlinedTextField(
-                value = notes,
-                onValueChange = { notes = it },
-                modifier = Modifier.fillMaxWidth().height(100.dp),
-                maxLines = 4,
-                shape = RoundedCornerShape(12.dp)
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Photos section (only for existing items)
-            if (isEdit) {
-                Text("票据照片", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Existing photos
-                if (item!!.photos.isNotEmpty()) {
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.padding(bottom = 8.dp)
+                    // Date
+                    Text("日期", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Surface(
+                        modifier = Modifier.fillMaxWidth().clickable { showDatePicker = true },
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                     ) {
-                        items(item.photos, key = { it.id }) { photo ->
-                            PhotoThumbnail(photo = photo, onDelete = { viewModel.deleteItemPhoto(photo.id) }, size = 80)
-                        }
+                        Text(
+                            selectedDate?.format(fmt) ?: "选择日期",
+                            modifier = Modifier.padding(10.dp),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (selectedDate != null) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
-                }
 
-                // Add photo button
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { showPhotoSourceDialog = true },
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                ) {
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Notes (collapsible)
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
                     Row(
-                        modifier = Modifier.padding(16.dp),
-                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                                RoundedCornerShape(8.dp)
+                            )
+                            .clickable { notesExpanded = !notesExpanded }
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (isUploading) {
-                            CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                        Text("备注", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        if (!notesExpanded && notes.text.isNotBlank()) {
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("上传中...", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        } else {
-                            Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("添加票据", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // AI analysis section
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    HorizontalDivider(modifier = Modifier.weight(1f))
-                    Text(
-                        " 或 让二狗重新分析 ",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    HorizontalDivider(modifier = Modifier.weight(1f))
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                OutlinedTextField(
-                    value = analysisText,
-                    onValueChange = { analysisText = it },
-                    modifier = Modifier.fillMaxWidth().height(80.dp),
-                    placeholder = { Text("上传新票据照片后可重新分析，或粘贴补充信息...", style = MaterialTheme.typography.bodySmall) },
-                    maxLines = 3,
-                    shape = RoundedCornerShape(12.dp)
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Button(
-                    onClick = {
-                        Toast.makeText(context, "二狗分析功能开发中", Toast.LENGTH_SHORT).show()
-                    },
-                    modifier = Modifier.fillMaxWidth().height(48.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Transparent
-                    )
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                Brush.horizontalGradient(
-                                    colors = listOf(Color(0xFF7C3AED), Color(0xFF6366F1))
-                                ),
-                                RoundedCornerShape(12.dp)
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                "二狗分析",
-                                style = MaterialTheme.typography.titleSmall,
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold
+                                notes.text.take(20) + if (notes.text.length > 20) "..." else "",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                maxLines = 1
                             )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color(0xFFFFD700), modifier = Modifier.size(18.dp))
+                        }
+                        Spacer(modifier = Modifier.weight(1f))
+                        Icon(
+                            if (notesExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                            contentDescription = if (notesExpanded) "收起" else "展开",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    AnimatedVisibility(visible = notesExpanded) {
+                        OutlinedTextField(
+                            value = notes,
+                            onValueChange = { notes = it },
+                            modifier = Modifier.fillMaxWidth().height(100.dp),
+                            maxLines = 4,
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Photos section
+                    Text("票据照片", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Existing photos (edit mode)
+                    if (isEdit && item!!.photos.isNotEmpty()) {
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        ) {
+                            items(item.photos, key = { it.id }) { photo ->
+                                PhotoThumbnail(photo = photo, onDelete = { viewModel.deleteItemPhoto(photo.id) }, onClick = { previewImageModel = "${NextApiService.BASE_URL}/api/uploads/${photo.storagePath}" }, size = 80)
+                            }
+                        }
+                    }
+
+                    // Pending photos (new item, not yet uploaded)
+                    if (!isEdit && pendingPhotos.isNotEmpty()) {
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        ) {
+                            itemsIndexed(pendingPhotos) { index, uri ->
+                                Box(modifier = Modifier.size(80.dp).padding(top = 4.dp, end = 4.dp)) {
+                                    AsyncImage(
+                                        model = uri,
+                                        contentDescription = "照片 ${index + 1}",
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .clickable { previewImageModel = uri },
+                                        contentScale = ContentScale.Crop
+                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .size(20.dp)
+                                            .background(Color.Black.copy(alpha = 0.6f), CircleShape)
+                                            .clickable {
+                                                pendingPhotos = pendingPhotos.toMutableList().apply { removeAt(index) }
+                                                pendingPhotoBytes = pendingPhotoBytes.toMutableList().apply { if (index < size) removeAt(index) }
+                                            },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(Icons.Default.Close, contentDescription = "删除", tint = Color.White, modifier = Modifier.size(12.dp))
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Add photo button
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showPhotoSourceDialog = true },
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (isUploading) {
+                                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("上传中...", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            } else {
+                                Icon(Icons.Default.CameraAlt, contentDescription = null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("添加票据", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                    }
+
+                    analysisState.error?.let { errorMsg ->
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            errorMsg,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                // Bottom buttons (fixed, not scrollable)
+                HorizontalDivider()
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Row 1: 二狗分析
+                    val hasContent = pendingPhotos.isNotEmpty() || notes.text.isNotBlank()
+                    Button(
+                        onClick = {
+                            android.widget.Toast.makeText(context, "photos=${pendingPhotos.size} bytes=${pendingPhotoBytes.size} notes=${notes.text.length}", android.widget.Toast.LENGTH_LONG).show()
+                            viewModel.analyzeReceipt(pendingPhotoBytes, notes.text.ifBlank { null })
+                        },
+                        enabled = hasContent && !analysisState.isAnalyzing,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.tertiary
+                        )
+                    ) {
+                        if (analysisState.isAnalyzing) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                strokeWidth = 2.dp,
+                                color = MaterialTheme.colorScheme.onTertiary
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("分析中...", color = MaterialTheme.colorScheme.onTertiary)
+                        } else {
+                            Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = MaterialTheme.colorScheme.onTertiary, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("让二狗分析", color = MaterialTheme.colorScheme.onTertiary)
+                        }
+                    }
+
+                    // Row 2: 删除 | 取消 | 保存
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (onDelete != null) {
+                            IconButton(onClick = { showDeleteConfirm = true }, modifier = Modifier.size(40.dp)) {
+                                Icon(Icons.Default.Delete, contentDescription = "删除", tint = MaterialTheme.colorScheme.error)
+                            }
+                        }
+                        Spacer(modifier = Modifier.weight(1f))
+                        TextButton(onClick = onDismiss) {
+                            Text("取消")
+                        }
+                        Button(
+                            onClick = {
+                                onSave(
+                                    type,
+                                    description.text,
+                                    amount.toDoubleOrNull(),
+                                    selectedDate?.format(fmt),
+                                    currency,
+                                    reimburseStatus,
+                                    notes.text.ifBlank { null },
+                                    pendingPhotos
+                                )
+                            },
+                            enabled = if (isEdit) true else (description.text.isNotBlank() && amount.toDoubleOrNull() != null)
+                        ) {
+                            Text(if (isEdit) "保存" else "添加")
                         }
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Save button
-            Button(
-                onClick = {
-                    onSave(
-                        type,
-                        description.text,
-                        amount.toDoubleOrNull(),
-                        selectedDate?.format(fmt),
-                        currency,
-                        reimburseStatus,
-                        notes.text.ifBlank { null }
-                    )
-                },
-                modifier = Modifier.fillMaxWidth().height(48.dp),
-                enabled = if (isEdit) true else (description.text.isNotBlank() && amount.toDoubleOrNull() != null),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text(if (isEdit) "保存修改" else "添加费用", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-            }
-
-            // Delete button for existing items
-            if (onDelete != null) {
-                Spacer(modifier = Modifier.height(8.dp))
-                TextButton(
-                    onClick = onDelete,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(Icons.Default.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("删除此费用", color = MaterialTheme.colorScheme.error)
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 
@@ -1372,6 +1496,57 @@ fun ItemFormBottomSheet(
             }
         )
     }
+
+    // Delete confirmation dialog
+    if (showDeleteConfirm && onDelete != null) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text("确认删除") },
+            text = { Text("确定删除此费用项？") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDeleteConfirm = false
+                    onDelete()
+                }) { Text("确定", color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }) { Text("取消") }
+            }
+        )
+    }
+
+    // Photo preview dialog
+    if (previewImageModel != null) {
+        Dialog(
+            onDismissRequest = { previewImageModel = null },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.9f))
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                AsyncImage(
+                    model = previewImageModel,
+                    contentDescription = "照片预览",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.8f),
+                    contentScale = ContentScale.Fit
+                )
+                IconButton(
+                    onClick = { previewImageModel = null },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                ) {
+                    Icon(Icons.Default.Close, contentDescription = "关闭", tint = Color.White)
+                }
+            }
+        }
+    }
 }
 
 // ── Date Picker ──
@@ -1413,4 +1588,18 @@ fun currencySymbol(currency: String): String = when (currency) {
     "USD" -> "$"
     "HKD" -> "HK$"
     else -> "$currency "
+}
+
+/** Copy a content URI to app cache, returning a file URI that remains readable. */
+private fun copyToCache(context: android.content.Context, uri: Uri): Uri? {
+    return try {
+        val file = java.io.File.createTempFile("pick_", ".jpg", context.cacheDir)
+        context.contentResolver.openInputStream(uri)?.use { input ->
+            file.outputStream().use { output -> input.copyTo(output) }
+        } ?: return null
+        Uri.fromFile(file)
+    } catch (e: Exception) {
+        timber.log.Timber.w(e, "[Trip] copyToCache failed uri=%s", uri)
+        null
+    }
 }

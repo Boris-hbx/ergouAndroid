@@ -1,0 +1,32 @@
+schema: spec-driven
+
+context: |
+  Tech stack: Kotlin, Android (Compose + Material 3), Room, Ktor, Koin, KSP, DataStore, Timber
+  LLM: DeepSeek API (pluggable LLMService interface)
+  Architecture: MVVM (ViewModel → Repository → DAO/LLMService)
+  Package: com.ergou.app
+  Build: AGP 9.0.1, Kotlin 2.0.21, Gradle 9.2.1
+
+  Key constraints:
+  - All user data stored locally (privacy-first)
+  - API Key in DataStore, never hardcoded
+  - Timber for logging, no android.util.Log
+  - Custom exception hierarchy (ErgouException → ApiException/ToolException/StorageException)
+  - Chinese IME: TextFieldValue for input fields, not StateFlow
+  - explicitNulls=false in Json config for DeepSeek compatibility
+
+rules:
+  specs:
+    - Requirements must consider Android lifecycle (Activity/Fragment recreation)
+    - Specify Room migration strategy for any database changes
+    - Include offline/error scenarios for network-dependent features
+    - Tool specs must define parameter schema and error handling
+  tasks:
+    - Include Room migration task for any Entity changes
+    - Include Koin module registration for new dependencies
+    - Include manual testing steps (no emulator CI yet)
+  design:
+    - Follow existing MVVM layers: UI (Compose) → ViewModel → Repository → DAO/Service
+    - New tools must implement Tool interface and register in ToolExecutor
+    - Prefer Room for local data, DataStore for preferences
+    - Network calls via Ktor HttpClient with 120s timeout

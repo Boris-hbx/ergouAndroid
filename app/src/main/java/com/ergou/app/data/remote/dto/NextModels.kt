@@ -215,7 +215,8 @@ data class NextExpenseEntry(
     @SerialName("updated_at") val updatedAt: String? = null,
     @SerialName("photo_count") val photoCount: Int = 0,
     @SerialName("item_count") val itemCount: Int = 0,
-    val items: List<NextExpenseItem>? = null
+    val items: List<NextExpenseItem>? = null,
+    val photos: List<NextExpensePhoto>? = null
 )
 
 @Serializable
@@ -277,8 +278,10 @@ data class NextParsePreviewItem(
 data class NextParsePreview(
     val merchant: String = "",
     val date: String? = null,
+    val time: String? = null,
     val currency: String = "CAD",
     val tags: List<String>? = null,
+    val description: String? = null,
     val items: List<NextParsePreviewItem> = emptyList(),
     val subtotal: Double = 0.0,
     val tax: Double = 0.0,
@@ -592,6 +595,38 @@ data class NextHealthCategoryListResponse(
 data class NextHealthItemListResponse(
     val success: Boolean = false,
     val items: List<NextHealthItem> = emptyList()
+)
+
+// ── Soul State ──
+
+@Serializable
+data class NextSoulState(
+    @SerialName("classical_ratio") val classicalRatio: Double = 0.9,
+    @SerialName("warmth_level") val warmthLevel: Double = 0.3,
+    @SerialName("verbosity_level") val verbosityLevel: Double = 0.3,
+    @SerialName("proactivity_level") val proactivityLevel: Double = 0.2,
+    @SerialName("trust_level") val trustLevel: Double = 0.1,
+    @SerialName("relationship_stage") val relationshipStage: String = "stranger",
+    @SerialName("total_interactions") val totalInteractions: Int = 0,
+    @SerialName("updated_at") val updatedAt: String? = null
+)
+
+@Serializable
+data class NextSoulStateResponse(
+    val success: Boolean = false,
+    @SerialName("soul_state") val soulState: NextSoulState? = null,
+    val message: String? = null
+)
+
+@Serializable
+data class NextSoulStateUpdateRequest(
+    @SerialName("classical_ratio") val classicalRatio: Double? = null,
+    @SerialName("warmth_level") val warmthLevel: Double? = null,
+    @SerialName("verbosity_level") val verbosityLevel: Double? = null,
+    @SerialName("proactivity_level") val proactivityLevel: Double? = null,
+    @SerialName("trust_level") val trustLevel: Double? = null,
+    @SerialName("relationship_stage") val relationshipStage: String? = null,
+    @SerialName("total_interactions") val totalInteractions: Int? = null
 )
 
 // ── Quadrant 映射 ──

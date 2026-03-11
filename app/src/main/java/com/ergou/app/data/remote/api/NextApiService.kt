@@ -6,6 +6,7 @@ import com.ergou.app.data.remote.dto.*
 import com.ergou.app.util.NextAuthProvider
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.statement.bodyAsText
 import io.ktor.client.request.delete
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
@@ -28,6 +29,21 @@ class NextApiService(
 
     companion object {
         internal const val BASE_URL = "https://next-boris.fly.dev"
+        private val flexJson = kotlinx.serialization.json.Json { ignoreUnknownKeys = true; explicitNulls = false }
+    }
+
+    /** 兼容解析 expense 响应：支持 { entry: {...} } 和直接 {...} 两种格式 */
+    private fun parseExpenseResponse(bodyText: String, errorPrefix: String): NextExpenseEntry {
+        // 尝试 { entry: {...} } 格式
+        try {
+            val parsed = flexJson.decodeFromString<NextExpenseDetailResponse>(bodyText)
+            if (parsed.entry != null) return parsed.entry
+        } catch (_: Exception) { }
+        // 尝试直接解析为 NextExpenseEntry
+        try {
+            return flexJson.decodeFromString<NextExpenseEntry>(bodyText)
+        } catch (_: Exception) { }
+        throw Exception("$errorPrefix：无法解析响应")
     }
 
     // ── Auth ──
@@ -218,8 +234,7 @@ class NextApiService(
                 contentType(ContentType.Application.Json)
                 setBody(request)
             }
-            response.body<NextExpenseDetailResponse>().entry
-                ?: throw Exception("创建失败：响应中无 entry")
+            parseExpenseResponse(response.bodyAsText(), "创建失败")
         }
 
     suspend fun getExpenseById(id: String): Result<NextExpenseEntry> =
@@ -229,6 +244,14 @@ class NextApiService(
                 ?: throw Exception("未找到 expense: $id")
         }
 
+    suspend fun getExpenseDetail(id: String): Result<NextExpenseDetailResponse> =
+        apiCall {
+            val response = httpClient.get("$BASE_URL/api/expenses/$id") { authHeader() }
+            response.body<NextExpenseDetailResponse>().also {
+                if (it.entry == null) throw Exception("未找到 expense: $id")
+            }
+        }
+
     suspend fun updateExpense(id: String, request: NextExpenseUpdateRequest): Result<NextExpenseEntry> =
         apiCall {
             val response = httpClient.put("$BASE_URL/api/expenses/$id") {
@@ -236,8 +259,13 @@ class NextApiService(
                 contentType(ContentType.Application.Json)
                 setBody(request)
             }
-            response.body<NextExpenseDetailResponse>().entry
-                ?: throw Exception("更新失败：响应中无 entry")
+            val bodyText = response.bodyAsText()
+            try {
+                return@apiCall parseExpenseResponse(bodyText, "更新失败")
+            } catch (_: Exception) { /* ignore */ }
+            // Fallback: re-fetch after successful PUT
+            val refetch = httpClient.get("$BASE_URL/api/expenses/$id") { authHeader() }
+            parseExpenseResponse(refetch.bodyAsText(), "更新后无法获取记录")
         }
 
     suspend fun deleteExpense(id: String): Result<Unit> =
@@ -266,8 +294,15 @@ class NextApiService(
             val mimeType = contentResolver.getType(uri) ?: "image/jpeg"
             val bytes = contentResolver.openInputStream(uri)?.use { it.readBytes() }
                 ?: throw Exception("无法读取图片")
-            val fileName = "photo.${mimeType.substringAfter("/", "jpg")}"
+            uploadExpensePhotoBytes(entryId, bytes, mimeType).getOrThrow()
+        }
 
+    suspend fun uploadExpensePhotoBytes(entryId: String, bytes: ByteArray, mimeType: String = "image/jpeg"): Result<NextExpensePhoto> =
+        apiCall {
+            if (bytes.size > 10 * 1024 * 1024) {
+                throw Exception("照片大小不能超过10MB")
+            }
+            val fileName = "photo.${mimeType.substringAfter("/", "jpg")}"
             val token = authProvider.sessionToken.first()
             val response = httpClient.submitFormWithBinaryData(
                 url = "$BASE_URL/api/expenses/$entryId/photos",
@@ -280,14 +315,32 @@ class NextApiService(
             ) {
                 if (token.isNotBlank()) header("Cookie", "session=$token")
             }
-            response.body<NextExpensePhotoResponse>().photo
-                ?: throw Exception("上传失败：响应中无 photo")
+            val bodyText = response.bodyAsText()
+            Timber.d("[Next] uploadPhoto response status=%s body=%s", response.status, bodyText.take(500))
+            // 兼容解析：尝试 { photo: {...} } 和直接 {...} 两种格式
+            try {
+                val parsed = flexJson.decodeFromString<NextExpensePhotoResponse>(bodyText)
+                if (parsed.photo != null) return@apiCall parsed.photo
+            } catch (_: Exception) { }
+            try {
+                return@apiCall flexJson.decodeFromString<NextExpensePhoto>(bodyText)
+            } catch (_: Exception) { }
+            throw Exception("响应(${response.status}): ${bodyText.take(200)}")
         }
 
     suspend fun deleteExpensePhoto(photoId: String): Result<Unit> =
         apiCall {
             httpClient.delete("$BASE_URL/api/expenses/photos/$photoId") { authHeader() }
             Unit
+        }
+
+    /**
+     * 下载已上传的照片原始字节（用于 AI 分析已有记账照片）
+     */
+    suspend fun downloadPhotoBytes(photoUrl: String): Result<ByteArray> =
+        apiCall {
+            val response = httpClient.get(photoUrl) { authHeader() }
+            response.body<ByteArray>()
         }
 
     suspend fun parseReceiptPreview(imageBase64: String, mimeType: String = "image/jpeg"): Result<NextParsePreview> =
@@ -498,6 +551,26 @@ class NextApiService(
         apiCall {
             val response = httpClient.get("$BASE_URL/api/health/search?q=$keyword") { authHeader() }
             response.body<com.ergou.app.data.remote.dto.NextHealthItemListResponse>().items
+        }
+
+    // ── Soul State ──
+
+    suspend fun getSoulState(): Result<NextSoulState> =
+        apiCall {
+            val response = httpClient.get("$BASE_URL/api/soul-state") { authHeader() }
+            response.body<NextSoulStateResponse>().soulState
+                ?: throw Exception("获取灵魂状态失败：响应中无 soul_state")
+        }
+
+    suspend fun putSoulState(request: NextSoulStateUpdateRequest): Result<NextSoulState> =
+        apiCall {
+            val response = httpClient.put("$BASE_URL/api/soul-state") {
+                authHeader()
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }
+            response.body<NextSoulStateResponse>().soulState
+                ?: throw Exception("更新灵魂状态失败：响应中无 soul_state")
         }
 
     // ── Internal ──

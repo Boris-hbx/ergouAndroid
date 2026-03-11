@@ -43,6 +43,13 @@ class DeepSeekService(
     }
 
     override fun chatStream(request: ChatRequest): Flow<String> = flow {
+        chatStreamChunks(request).collect { chunk ->
+            val content = chunk.choices.firstOrNull()?.delta?.content
+            if (content != null) emit(content)
+        }
+    }
+
+    override fun chatStreamChunks(request: ChatRequest): Flow<ChatResponse> = flow {
         val key = getApiKey()
         val streamRequest = request.copy(stream = true)
         val response = httpClient.post(CHAT_ENDPOINT) {
@@ -60,10 +67,7 @@ class DeepSeekService(
 
             try {
                 val chunk = json.decodeFromString<ChatResponse>(data)
-                val content = chunk.choices.firstOrNull()?.delta?.content
-                if (content != null) {
-                    emit(content)
-                }
+                emit(chunk)
             } catch (e: Exception) {
                 Timber.w(e, "解析SSE数据失败: $data")
             }

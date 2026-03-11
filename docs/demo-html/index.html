@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>二狗 UI Demo 合集</title>
+<style>
+/* ===== Global Layout ===== */
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"Segoe UI",Roboto,sans-serif;background:#f5f5f5;display:flex;height:100vh;overflow:hidden}
+
+/* Sidebar */
+.sidebar{width:240px;min-width:240px;background:#fff;border-right:1px solid #e0e0e0;overflow-y:auto;padding:16px 0;display:flex;flex-direction:column}
+.sidebar-title{font-size:16px;font-weight:700;color:#7c5cfc;padding:0 16px 12px;border-bottom:1px solid #eee;margin-bottom:8px}
+.tree-folder{font-size:13px;color:#888;padding:8px 16px 4px;font-weight:600;display:flex;align-items:center;gap:6px}
+.tree-item{display:block;font-size:13px;color:#555;text-decoration:none;padding:6px 16px 6px 28px;border-left:3px solid transparent;transition:all 0.15s;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tree-item:hover{background:#f8f7ff;color:#7c5cfc}
+.tree-item.active{background:#f0edff;color:#7c5cfc;border-left-color:#7c5cfc;font-weight:600}
+.tree-connector{color:#ccc;font-size:12px;padding-left:20px;line-height:0;user-select:none}
+
+/* Main content */
+.main{flex:1;overflow-y:auto;scroll-behavior:smooth}
+.demo-section{padding:32px 24px;border-bottom:2px solid #e0e0e0}
+.demo-section:last-child{border-bottom:none}
+.section-heading{font-size:20px;font-weight:700;color:#333;margin-bottom:20px;padding-bottom:8px;border-bottom:2px solid #7c5cfc;display:inline-block}
+.section-heading .num{color:#7c5cfc}
+</style>
+
+<!-- ===== S1 Styles ===== -->
+<style>
+.s1 .phone{width:375px;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.12);display:inline-block;vertical-align:top;margin:8px}
+.s1 .phone-header{background:#fafafa;padding:16px;text-align:center;border-bottom:1px solid #eee}
+.s1 .phone-header h3{font-size:15px;color:#333}
+.s1 .phone-header .desc{font-size:11px;color:#999;margin-top:4px}
+.s1 .phone-body{padding:12px}
+.s1 .day-header{display:flex;justify-content:space-between;padding:8px 4px 4px;font-size:13px;font-weight:600;color:#666}
+.s1 .day-header .subtotal{font-weight:400;color:#999}
+.s1 .item{cursor:pointer}
+.s1 .item .title{font-size:14px;color:#1a1a1a}
+.s1 .item .tag{font-size:11px;color:#7c5cfc}
+.s1 .item .time{font-size:11px;color:#999}
+.s1 .item .amount{font-size:15px;font-weight:500;color:#1a1a1a;white-space:nowrap}
+.s1 .item .camera{font-size:12px;color:#bbb;margin-right:4px}
+.s1 .item .row{display:flex;align-items:center;justify-content:space-between}
+.s1 .item .left{flex:1;min-width:0}
+.s1 .item .right{display:flex;align-items:center;gap:4px}
+.s1 .style-a .item{padding:10px 4px;border-bottom:1px solid #f0f0f0}
+.s1 .style-a .item:last-child{border-bottom:none}
+.s1 .style-b .item{padding:10px 12px;margin-bottom:6px;border-radius:8px;background:#fafafa;border-left:3px solid #7c5cfc}
+.s1 .style-c .item{padding:10px 12px;margin-bottom:6px;border-radius:12px;background:#f8f7ff}
+.s1 .style-d .item{padding:8px 4px;border-bottom:1px solid #f0f0f0;display:flex;align-items:flex-start;gap:10px}
+.s1 .style-d .item:last-child{border-bottom:none}
+.s1 .style-d .dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.s1 .style-d .dot.food{background:#ff9800}
+.s1 .style-d .dot.gas{background:#4caf50}
+.s1 .style-d .dot.market{background:#2196f3}
+.s1 .style-d .dot.fun{background:#e91e63}
+.s1 .style-d .item .content{flex:1;min-width:0}
+.s1 .style-e .item{padding:8px 4px;border-bottom:1px solid #f0f0f0}
+.s1 .style-e .item:last-child{border-bottom:none}
+.s1 .style-e .badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:4px;background:#f0edff;color:#7c5cfc;margin-left:6px;vertical-align:middle}
+</style>
+
+<!-- ===== S2 Styles ===== -->
+<style>
+.s2 h1{text-align:center;margin-bottom:30px;color:#333}
+.s2 .grid{display:flex;flex-wrap:wrap;gap:30px;justify-content:center}
+.s2 .mockup-wrapper{text-align:center}
+.s2 .mockup-wrapper h2{margin-bottom:10px;color:#555;font-size:16px}
+.s2 .mockup-wrapper p{margin-bottom:12px;color:#888;font-size:13px;max-width:375px}
+.s2 .phone{width:375px;height:720px;background:#1c1c1e;border-radius:36px;padding:12px;box-shadow:0 8px 30px rgba(0,0,0,0.3);overflow:hidden;position:relative}
+.s2 .phone-screen{width:100%;height:100%;border-radius:26px;overflow:hidden;display:flex;flex-direction:column}
+.s2{--bg:#1c1c1e;--surface:#2c2c2e;--surface-variant:#3a3a3c;--surface-container-low:#252527;--outline:#48484a;--outline-variant:#3a3a3c;--on-surface:#e5e5e7;--on-surface-variant:#9a9a9e;--primary:#a78bfa;--primary-container:#3b2d6b;--tertiary:#7dd3a8;--tertiary-container:#1a4a35;--error:#ff6b6b;--divider:#38383a}
+.s2 .header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;background:var(--surface);border-bottom:1px solid var(--divider)}
+.s2 .header-title{font-size:18px;font-weight:700;color:var(--on-surface)}
+.s2 .header-close{font-size:22px;color:var(--on-surface-variant);cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%}
+.s2 .header-close:hover{background:var(--surface-variant)}
+.s2 .scroll-area{flex:1;overflow-y:auto;padding:12px 16px}
+.s2 .bottom-bar{padding:10px 16px 14px;border-top:1px solid var(--divider);background:var(--surface)}
+.s2 .chip-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;flex-shrink:0}
+.s2 .chip{padding:5px 10px;border-radius:16px;font-size:12px;white-space:nowrap;cursor:pointer;border:1px solid var(--outline);color:var(--on-surface-variant);background:transparent;transition:all 0.15s}
+.s2 .chip.active{background:var(--primary-container);color:var(--primary);border-color:var(--primary)}
+.s2 .label{font-size:11px;color:var(--on-surface-variant);margin-bottom:4px;font-weight:500}
+.s2 .input-field{width:100%;padding:8px 12px;border-radius:10px;border:1px solid var(--outline);background:transparent;color:var(--on-surface);font-size:13px;outline:none}
+.s2 .input-field:focus{border-color:var(--primary)}
+.s2 .input-field::placeholder{color:var(--on-surface-variant);opacity:0.5}
+.s2 .btn-primary{padding:10px 20px;border-radius:20px;border:none;background:var(--primary);color:#1c1c1e;font-weight:600;font-size:14px;cursor:pointer}
+.s2 .btn-secondary{padding:10px 20px;border-radius:20px;border:none;background:transparent;color:var(--on-surface-variant);font-size:14px;cursor:pointer}
+.s2 .btn-tertiary{padding:10px 20px;border-radius:20px;border:none;background:var(--tertiary-container);color:var(--tertiary);font-weight:600;font-size:13px;cursor:pointer;width:100%}
+.s2 .btn-delete{width:36px;height:36px;border-radius:50%;border:none;background:transparent;color:var(--error);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.s2 .photo-row{display:flex;gap:8px;align-items:center}
+.s2 .photo-thumb{width:56px;height:56px;border-radius:8px;background:var(--surface-variant);display:flex;align-items:center;justify-content:center;position:relative;overflow:visible;font-size:24px;color:var(--on-surface-variant)}
+.s2 .photo-thumb img{width:100%;height:100%;object-fit:cover;border-radius:8px}
+.s2 .photo-del{position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:rgba(0,0,0,0.7);border-radius:50%;color:white;font-size:10px;display:flex;align-items:center;justify-content:center}
+.s2 .photo-add{width:56px;height:56px;border-radius:8px;border:1px dashed var(--outline);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--on-surface-variant);font-size:20px}
+.s2 .notes-toggle{display:flex;align-items:center;padding:8px 12px;border-radius:8px;background:var(--surface-variant);cursor:pointer;gap:8px}
+.s2 .notes-toggle .label{margin:0}
+.s2 .notes-hint{font-size:11px;color:var(--on-surface-variant);opacity:0.6;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.s2 .notes-arrow{font-size:16px;color:var(--on-surface-variant)}
+.s2 .separator{height:1px;background:var(--divider);margin:8px 0}
+.s2 .row{display:flex;gap:8px;align-items:center}
+.s2 .flex-1{flex:1}
+.s2 .amount-big{font-size:28px;font-weight:700;color:var(--on-surface)}
+.s2 .amount-currency{font-size:16px;color:var(--on-surface-variant);margin-right:4px}
+.s2 .date-card{display:flex;align-items:center;padding:8px 12px;border-radius:10px;background:var(--surface-variant);cursor:pointer;justify-content:space-between}
+.s2 .date-card span{font-size:13px;color:var(--on-surface)}
+.s2 .date-card .chevron{font-size:14px;color:var(--on-surface-variant)}
+.s2 .design-a .amount-section{background:var(--surface-variant);border-radius:16px;padding:16px;margin-bottom:12px;text-align:center}
+.s2 .design-a .amount-input-big{background:transparent;border:none;font-size:32px;font-weight:700;color:var(--on-surface);text-align:center;width:100%;outline:none}
+.s2 .design-a .amount-input-big::placeholder{color:var(--on-surface-variant);opacity:0.3}
+.s2 .design-a .currency-chips{display:flex;gap:6px;justify-content:center;margin-top:8px}
+.s2 .design-a .currency-chip{padding:3px 10px;border-radius:12px;font-size:11px;border:1px solid var(--outline);color:var(--on-surface-variant);background:transparent;cursor:pointer}
+.s2 .design-a .currency-chip.active{background:var(--primary-container);color:var(--primary);border-color:var(--primary)}
+.s2 .design-a .field-group{margin-bottom:10px}
+.s2 .design-b .section-card{background:var(--surface-container-low);border-radius:12px;padding:12px;margin-bottom:8px}
+.s2 .design-b .section-card .row-item{display:flex;align-items:center;padding:6px 0;gap:10px}
+.s2 .design-b .section-card .row-item .icon{font-size:16px;width:24px;text-align:center}
+.s2 .design-b .section-card .row-item .row-label{font-size:12px;color:var(--on-surface-variant);width:36px;flex-shrink:0}
+.s2 .design-b .section-card .row-item .row-value{flex:1;font-size:13px;color:var(--on-surface)}
+.s2 .design-b .section-card .row-item input{flex:1;background:transparent;border:none;color:var(--on-surface);font-size:13px;outline:none}
+.s2 .design-b .section-card .row-item input::placeholder{color:var(--on-surface-variant);opacity:0.4}
+.s2 .design-b .inner-sep{height:1px;background:var(--divider);margin:2px 0}
+.s2 .design-c .inline-field{display:flex;align-items:center;padding:10px 0;border-bottom:1px solid var(--divider)}
+.s2 .design-c .inline-field:last-child{border-bottom:none}
+.s2 .design-c .inline-label{font-size:13px;color:var(--on-surface-variant);width:56px;flex-shrink:0}
+.s2 .design-c .inline-input{flex:1;background:transparent;border:none;color:var(--on-surface);font-size:14px;outline:none;text-align:right}
+.s2 .design-c .inline-input::placeholder{color:var(--on-surface-variant);opacity:0.4}
+.s2 .design-c .inline-suffix{font-size:12px;color:var(--on-surface-variant);margin-left:4px}
+.s2 .design-c .amount-hero{text-align:center;padding:20px 0 16px}
+.s2 .design-c .amount-hero input{background:transparent;border:none;font-size:36px;font-weight:700;color:var(--on-surface);text-align:center;width:80%;outline:none}
+.s2 .design-c .amount-hero input::placeholder{color:var(--on-surface-variant);opacity:0.2}
+.s2 .design-c .amount-hero .cur{font-size:14px;color:var(--primary)}
+.s2 .design-d .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.s2 .design-d .form-grid .full{grid-column:1 / -1}
+.s2 .design-d .grid-field{background:var(--surface-container-low);border-radius:10px;padding:10px 12px}
+.s2 .design-d .grid-field .gf-label{font-size:10px;color:var(--on-surface-variant);margin-bottom:2px;text-transform:uppercase;letter-spacing:0.5px}
+.s2 .design-d .grid-field .gf-value{font-size:14px;color:var(--on-surface);font-weight:500}
+.s2 .design-d .grid-field input{width:100%;background:transparent;border:none;color:var(--on-surface);font-size:14px;font-weight:500;outline:none}
+.s2 .design-d .grid-field input::placeholder{color:var(--on-surface-variant);opacity:0.4}
+.s2 .design-e .tab-bar{display:flex;gap:0;border-bottom:2px solid var(--divider);margin-bottom:12px}
+.s2 .design-e .tab{flex:1;text-align:center;padding:8px 0;font-size:13px;color:var(--on-surface-variant);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px}
+.s2 .design-e .tab.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+.s2 .design-e .amount-bar{display:flex;align-items:baseline;gap:4px;padding:8px 0 12px}
+.s2 .design-e .amount-bar .cur-tag{padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:var(--primary-container);color:var(--primary)}
+.s2 .design-e .amount-bar input{flex:1;background:transparent;border:none;font-size:24px;font-weight:700;color:var(--on-surface);outline:none}
+.s2 .design-e .amount-bar input::placeholder{color:var(--on-surface-variant);opacity:0.3}
+.s2 .design-e .pill-field{display:flex;align-items:center;padding:10px 14px;border-radius:12px;background:var(--surface-container-low);margin-bottom:8px;gap:10px}
+.s2 .design-e .pill-field .pf-icon{font-size:16px}
+.s2 .design-e .pill-field .pf-label{font-size:12px;color:var(--on-surface-variant);width:48px}
+.s2 .design-e .pill-field input{flex:1;background:transparent;border:none;color:var(--on-surface);font-size:13px;outline:none}
+.s2 .design-e .pill-field input::placeholder{color:var(--on-surface-variant);opacity:0.4}
+.s2 .design-e .pill-field .pf-right{font-size:12px;color:var(--on-surface-variant)}
+</style>
+
+<!-- ===== S3 Styles ===== -->
+<style>
+.s3 .phone{width:360px;background:rgba(0,0,0,0.4);border-radius:24px;padding:40px 16px;display:inline-flex;align-items:center;justify-content:center;vertical-align:top;margin:8px}
+.s3 .dialog{width:100%;background:#fff;border-radius:20px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,0.2)}
+.s3 .label{font-size:11px;color:#888;margin-bottom:4px}
+.s3 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.s3 .header h2{font-size:18px;font-weight:700}
+.s3 .header .close{font-size:20px;color:#999;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%}
+.s3 .input-field{width:100%;border:1px solid #ddd;border-radius:8px;padding:6px 10px;font-size:13px;outline:none;background:#fff}
+.s3 .input-field::placeholder{color:#bbb}
+.s3 textarea.input-field{resize:none;font-family:inherit;overflow:hidden}
+.s3 .desc-wrap{position:relative}
+.s3 .desc-wrap textarea{max-height:2.8em;line-height:1.4em;transition:max-height 0.2s ease}
+.s3 .desc-wrap.expanded textarea{max-height:20em}
+.s3 .desc-toggle{font-size:11px;color:#7c5cfc;cursor:pointer;text-align:right;margin-top:2px}
+.s3 .chip-row{display:flex;gap:6px;flex-shrink:0}
+.s3 .chip{padding:2px 8px;border-radius:16px;font-size:11px;border:1px solid #ddd;cursor:pointer;background:#fff;color:#666}
+.s3 .chip.active{background:#7c5cfc;color:#fff;border-color:#7c5cfc}
+.s3 .amount-line{display:flex;align-items:center;gap:8px}
+.s3 .amount-line .label{margin-bottom:0;flex-shrink:0}
+.s3 .amount-line .input-field{flex:1}
+.s3 .datetime-row{display:flex;gap:8px}
+.s3 .date-bar{display:flex;justify-content:space-between;align-items:center;background:#f5f5f5;border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer;flex:1}
+.s3 .date-bar .arrow{color:#bbb;font-size:14px}
+.s3 .time-bar{display:flex;align-items:center;background:#f5f5f5;border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer;min-width:80px;justify-content:center;gap:4px}
+.s3 .time-bar .clock{font-size:12px;color:#999}
+.s3 .time-bar.empty{color:#bbb}
+.s3 .photo-row{display:flex;gap:8px;align-items:center}
+.s3 .photo-thumb{width:52px;height:52px;border-radius:8px;background:#eee url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23bbb"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>') center/60% no-repeat;position:relative}
+.s3 .photo-thumb .x{position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;background:#e53935;color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center}
+.s3 .add-photo{width:52px;height:52px;border-radius:8px;border:1.5px dashed #ccc;display:flex;align-items:center;justify-content:center;color:#bbb;font-size:20px;cursor:pointer}
+.s3 .items-card{background:#fafafa;border-radius:10px;padding:10px 12px}
+.s3 .items-card .items-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.s3 .items-card .items-header span{font-size:11px;color:#999}
+.s3 .items-card .items-header .total{font-size:13px;color:#333;font-weight:600}
+.s3 .items-card .item-row{display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;font-size:13px;color:#333;border-bottom:1px solid #f0f0f0}
+.s3 .items-card .item-row:last-child{border-bottom:none}
+.s3 .items-card .item-left{flex:1;min-width:0}
+.s3 .items-card .item-name-orig{font-size:13px;color:#333}
+.s3 .items-card .item-name-trans{font-size:11px;color:#999}
+.s3 .tag-sm{font-size:9px;border-radius:3px;padding:0 4px;margin-left:4px;vertical-align:middle}
+.s3 .tag-orig{color:#999;background:#f0f0f0}
+.s3 .tag-cn{color:#7c5cfc;background:#f0edff}
+.s3 .tag-en{color:#0277bd;background:#e1f5fe}
+.s3 .items-card .item-right{display:flex;align-items:center;gap:6px;white-space:nowrap;padding-top:2px}
+.s3 .items-card .item-qty{color:#999;font-size:12px}
+.s3 .items-card .item-amt{font-weight:500;font-size:13px}
+.s3 .btn-ai-row{margin-top:16px}
+.s3 .btn-ai-row .btn-ai{width:100%;padding:10px;border:none;border-radius:10px;font-size:13px;cursor:pointer;text-align:center;background:#00897b;color:#fff}
+.s3 .btn-row{display:flex;gap:8px;margin-top:8px}
+.s3 .btn{flex:1;padding:8px;border:none;border-radius:10px;font-size:13px;cursor:pointer;text-align:center}
+.s3 .btn-cancel{background:#f5f5f5;color:#666}
+.s3 .btn-save{background:#7c5cfc;color:#fff}
+.s3 .btn-ai{background:#00897b;color:#fff}
+.s3 .btn-delete{background:#fff;color:#e53935;border:1px solid #e53935}
+.s3 .sp-4{height:4px}.s3 .sp-8{height:8px}.s3 .sp-12{height:12px}.s3 .sp-16{height:16px}
+.s3 .section-label{font-size:18px;font-weight:700;text-align:center;margin-bottom:8px;color:#333}
+.s3 .section-desc{font-size:12px;color:#999;text-align:center;margin-bottom:16px}
+</style>
+
+<!-- ===== S4 Styles ===== -->
+<style>
+.s4 .card{width:320px;background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,0.08);display:inline-block;vertical-align:top;margin:8px}
+.s4 .card-label{font-size:14px;font-weight:700;text-align:center;margin-bottom:6px;color:#333}
+.s4 .card-desc{font-size:11px;color:#999;text-align:center;margin-bottom:16px}
+.s4 .section{margin-bottom:12px}
+.s4 .section-title{font-size:10px;color:#999;margin-bottom:4px}
+.s4 .field{background:#f5f5f5;border:1px solid #e0e0e0;border-radius:6px;padding:6px 10px;font-size:12px;color:#666;height:32px;display:flex;align-items:center}
+.s4 .btn-row{display:flex;gap:8px}
+.s4 .btn{flex:1;padding:8px;border:none;border-radius:10px;font-size:13px;cursor:pointer;text-align:center}
+.s4 .btn-cancel{background:#f5f5f5;color:#666}
+.s4 .btn-save{background:#7c5cfc;color:#fff}
+.s4 .btn-ai-a{width:100%;padding:10px;border:none;border-radius:10px;font-size:13px;cursor:pointer;text-align:center;background:#78909c;color:#fff;margin-bottom:8px}
+.s4 .btn-ai-b{width:100%;padding:10px;border:none;border-radius:10px;font-size:13px;cursor:pointer;text-align:center;background:linear-gradient(135deg,#7c5cfc,#a78bfa);color:#fff;margin-bottom:8px}
+.s4 .btn-ai-c{width:100%;padding:10px;border:none;border-radius:10px;font-size:13px;cursor:pointer;text-align:center;background:#00897b;color:#fff;margin-bottom:8px}
+.s4 .btn-ai-d{width:100%;padding:10px;border:1.5px solid #7c5cfc;border-radius:10px;font-size:13px;cursor:pointer;text-align:center;background:#fff;color:#7c5cfc;margin-bottom:8px;font-weight:500}
+.s4 .btn-ai-e{width:100%;padding:10px;border:none;border-radius:10px;font-size:13px;cursor:pointer;text-align:center;background:linear-gradient(135deg,#00897b,#26a69a);color:#fff;margin-bottom:8px}
+</style>
+
+<!-- ===== S5 Styles ===== -->
+<style>
+.s5 .card{width:320px;background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,0.08);display:inline-block;vertical-align:top;margin:8px}
+.s5 .card-label{font-size:14px;font-weight:700;text-align:center;margin-bottom:6px;color:#333}
+.s5 .card-desc{font-size:11px;color:#999;text-align:center;margin-bottom:16px}
+.s5 .section{margin-bottom:12px}
+.s5 .section-title{font-size:10px;color:#999;margin-bottom:4px}
+.s5 .field{background:#f5f5f5;border:1px solid #e0e0e0;border-radius:6px;padding:6px 10px;font-size:12px;color:#666;height:32px;display:flex;align-items:center}
+.s5 .btn-row{display:flex;gap:8px}
+.s5 .btn{flex:1;padding:8px;border:none;border-radius:10px;font-size:13px;cursor:pointer;text-align:center}
+.s5 .btn-cancel{background:#f5f5f5;color:#666}
+.s5 .btn-save{background:#7c5cfc;color:#fff}
+.s5 .btn-ai{width:100%;padding:10px;border:none;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;text-align:center;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px}
+.s5 .btn-ai.normal{background:linear-gradient(135deg,#7c5cfc,#a78bfa);color:#fff}
+.s5 .btn-ai.loading-a{background:#ede9fe;color:#7c5cfc;border:1.5px solid #7c5cfc;animation:s5-pulse-a 1.5s ease-in-out infinite}
+@keyframes s5-pulse-a{0%,100%{opacity:1}50%{opacity:0.6}}
+.s5 .btn-ai.loading-b{background:linear-gradient(90deg,#7c5cfc,#a78bfa,#c4b5fd,#a78bfa,#7c5cfc);background-size:300% 100%;color:#fff;animation:s5-flow-b 2s ease infinite}
+@keyframes s5-flow-b{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+.s5 .btn-ai.loading-c{background:#fff;color:#7c5cfc;border:1.5px solid #d4c8ff;position:relative;overflow:hidden}
+.s5 .btn-ai.loading-c::after{content:'';position:absolute;bottom:0;left:0;height:3px;width:40%;background:linear-gradient(90deg,#7c5cfc,#a78bfa);border-radius:0 0 10px 10px;animation:s5-progress-c 2s ease-in-out infinite}
+@keyframes s5-progress-c{0%{left:-40%}100%{left:100%}}
+.s5 .btn-ai.loading-d{background:#ede9fe;color:#7c5cfc;font-weight:500}
+.s5 .spinner{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:s5-spin 0.8s linear infinite}
+@keyframes s5-spin{to{transform:rotate(360deg)}}
+.s5 .dots::after{content:'';animation:s5-dots-anim 1.5s steps(4,end) infinite}
+@keyframes s5-dots-anim{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
+</style>
+
+<!-- ===== S6 Styles ===== -->
+<style>
+.s6 .phone{width:390px;background:#fafafa;border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.12);display:inline-block;vertical-align:top;margin:8px}
+.s6 .phone-header{background:#fff;padding:16px;text-align:center;border-bottom:1px solid #eee}
+.s6 .phone-header h3{font-size:15px;color:#333}
+.s6 .phone-header .desc{font-size:11px;color:#999;margin-top:4px}
+.s6 .phone-body{padding:12px;display:flex;flex-direction:column;gap:8px}
+.s6 .item{border-radius:14px;padding:12px 14px 12px 8px;display:flex;align-items:center;gap:4px}
+.s6 .checkbox{width:38px;height:38px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.s6 .checkbox input[type="checkbox"]{width:20px;height:20px;accent-color:#7c5cfc;cursor:pointer}
+.s6 .content{flex:1;min-width:0}
+.s6 .title{font-size:15px;color:#1a1a1a;font-weight:500}
+.s6 .subtitle{font-size:12px;color:#999;margin-top:3px}
+.s6 .completed .title{text-decoration:line-through;color:#aaa}
+.s6 .completed .subtitle{color:#bbb}
+.s6 .progress-ring{width:32px;height:32px;flex-shrink:0;position:relative;margin-left:8px}
+.s6 .progress-ring svg{width:32px;height:32px}
+.s6 .ring-track{fill:none;stroke:#e5e5e5;stroke-width:3}
+.s6 .ring-fill{fill:none;stroke:#7c5cfc;stroke-width:3;stroke-linecap:round;transform:rotate(-90deg);transform-origin:center}
+.s6 .progress-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;color:#555}
+.s6 .current .item{background:#fff;border-radius:12px;padding:10px 12px 10px 4px}
+.s6 .current .quad-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-right:6px}
+.s6 .current .tags{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap}
+.s6 .current .chip{font-size:10px;color:#666;border:1px solid #ddd;border-radius:12px;padding:2px 8px;background:#fff}
+.s6 .current .due{font-size:11px;color:#999;margin-top:2px}
+.s6 .current .due.warn{color:#e53935}
+.s6 .new .item{background:#f3eeff}
+.s6 .new .item.completed{background:#f0f0f0}
+</style>
+
+<!-- ===== S7 Styles ===== -->
+<style>
+.s7 .phone{width:375px;background:#fff;border-radius:20px;box-shadow:0 4px 24px rgba(0,0,0,0.12);overflow:hidden;font-family:-apple-system,'Segoe UI',Roboto,sans-serif;display:inline-block;vertical-align:top;margin:8px}
+.s7 .dialog{padding:20px}
+.s7 .hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.s7 .hdr h2{font-size:20px;font-weight:700;color:#1a1a1a}
+.s7 .hdr .x{width:28px;height:28px;border-radius:50%;border:none;background:#f0f0f0;font-size:16px;cursor:pointer;color:#888;line-height:28px;text-align:center}
+.s7 .lbl{font-size:11px;color:#999;margin-bottom:3px;letter-spacing:0.5px}
+.s7 .grp{margin-bottom:10px}
+.s7 input.f{height:32px;border:1px solid #ddd;border-radius:6px;padding:0 10px;font-size:14px;color:#222;outline:none;background:#fff;width:100%}
+.s7 input.f:focus{border-color:#7C5CFC}
+.s7 input.f.ok{border-color:#7C5CFC;background:#FAFAFF}
+.s7 .amt-row{display:flex;align-items:center;gap:6px}
+.s7 .amt-row input.f{flex:1}
+.s7 .chips{display:flex;gap:3px}
+.s7 .c{height:32px;padding:0 10px;border-radius:6px;font-size:12px;border:1px solid #ddd;background:#fff;color:#888;cursor:pointer;display:inline-flex;align-items:center}
+.s7 .c.on{background:#EDE9FE;border-color:#7C5CFC;color:#6D28D9;font-weight:600}
+.s7 .dt-row{display:flex;gap:6px}
+.s7 .bar{height:34px;border-radius:6px;background:#f4f4f5;display:flex;align-items:center;padding:0 10px;font-size:13px;color:#333;cursor:pointer;gap:4px}
+.s7 .bar.date{flex:1;justify-content:space-between}
+.s7 .bar .arr{color:#bbb;font-size:14px}
+.s7 .card{border:1px solid #eee;border-radius:10px;overflow:hidden}
+.s7 .card-hd{padding:8px 12px;background:#fafafa;border-bottom:1px solid #f0f0f0;font-size:12px;color:#888}
+.s7 .row{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 12px;border-bottom:1px solid #f5f5f5}
+.s7 .row:last-child{border-bottom:none}
+.s7 .n{font-size:13px;color:#333}
+.s7 .tag{font-size:10px;padding:1px 5px;border-radius:3px;margin-left:3px;vertical-align:middle}
+.s7 .tag.orig{background:#f0f0f0;color:#999}
+.s7 .tag.tr{background:#E3F2FD;color:#1565C0}
+.s7 .sp{font-size:11px;color:#aaa;margin-top:1px}
+.s7 .a{font-size:13px;color:#333;white-space:nowrap;padding-left:8px}
+.s7 .sub{display:flex;justify-content:space-between;padding:6px 12px;font-size:12px;color:#999;background:#fafafa;border-top:1px solid #f0f0f0;border-bottom:1px solid #f0f0f0}
+.s7 .row.tax{background:#FFFDE7}
+.s7 .row.tax .n{color:#F57F17}
+.s7 .row.tax .a{color:#F57F17}
+.s7 .tot{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:linear-gradient(135deg,#EDE9FE 0%,#E0E7FF 100%)}
+.s7 .tot .tl{font-size:13px;font-weight:600;color:#6D28D9}
+.s7 .tot .ta{font-size:15px;font-weight:700;color:#6D28D9}
+.s7 .desc{border:1px solid #ddd;border-radius:6px;padding:8px 10px;font-size:13px;color:#555;line-height:1.4;background:#fff}
+.s7 .abtn{width:100%;height:38px;border-radius:8px;border:none;background:linear-gradient(135deg,#7C5CFC,#A78BFA);color:#fff;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px}
+.s7 .acts{display:flex;gap:6px;margin-top:6px}
+.s7 .acts button{flex:1;height:36px;border-radius:8px;font-size:13px;cursor:pointer}
+.s7 .acts .can{border:1px solid #ddd;background:#fff;color:#888}
+.s7 .acts .sav{border:none;background:#7C5CFC;color:#fff;font-weight:600}
+.s7 .version-label{text-align:center;padding:12px;font-size:13px;color:#7C5CFC;font-weight:600;background:#fafafa}
+.s7 .note{background:#FFF3CD;padding:8px 12px;border-radius:8px;font-size:11px;color:#856404;margin:8px 0;line-height:1.5}
+</style>
+</head>
+<body>
+
+<!-- ===== Sidebar ===== -->
+<nav class="sidebar">
+  <div class="sidebar-title">UI Demo</div>
+  <div class="tree-folder">&#128193; 草稿图</div>
+  <a class="tree-item" href="#s1" data-section="s1">&#9500;&#9472; 01 账单明细样式</a>
+  <a class="tree-item" href="#s2" data-section="s2">&#9500;&#9472; 02 差旅表单样式</a>
+  <a class="tree-item" href="#s3" data-section="s3">&#9500;&#9472; 03 记账弹窗重设计</a>
+  <a class="tree-item" href="#s4" data-section="s4">&#9500;&#9472; 04 分析按钮样式</a>
+  <a class="tree-item" href="#s5" data-section="s5">&#9500;&#9472; 05 分析按钮状态</a>
+  <a class="tree-item" href="#s6" data-section="s6">&#9500;&#9472; 06 待办项重设计</a>
+  <a class="tree-item" href="#s7" data-section="s7">&#9500;&#9472; 07 记账分析填充</a>
+  <a class="tree-item" href="#s8" data-section="s8">&#9492;&#9472; 08 场景长按删除</a>
+</nav>
+
+<!-- ===== Main Content ===== -->
+<div class="main" id="mainContent">
+
+<!-- ========== Section 1 ========== -->
+<section id="s1" class="demo-section s1">
+<div class="section-heading"><span class="num">01</span> — 账单明细样式 (expense-item-styles)</div>
+<div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center">
+<!-- Style A -->
+<div class="phone">
+  <div class="phone-header">
+    <h3>A: 无边框 + 分隔线</h3>
+    <div class="desc">极简风格，底部细线分隔，最省空间</div>
+  </div>
+  <div class="phone-body style-a">
+    <div class="day-header"><span>昨天</span><span class="subtotal">CA$6.00</span></div>
+    <div class="item"><div class="row"><div class="left"><span class="title">Royal Botanical Gardens</span><span class="tag"> #娱乐</span></div><div class="right"><span class="camera">&#128247;</span><span class="amount">CA$6.00</span></div></div><div class="time">3月8日 14:30</div></div>
+    <div class="day-header"><span>3月7日 周五</span><span class="subtotal">CA$190.22</span></div>
+    <div class="item"><div class="row"><div class="left"><span class="title">Stone Crock Market</span><span class="tag"> #餐饮</span></div><div class="right"><span class="amount">CA$11.34</span></div></div><div class="time">3月7日 18:45</div></div>
+    <div class="item"><div class="row"><div class="left"><span class="title">T&amp;T SUPERMARKET</span><span class="tag"> #超市</span></div><div class="right"><span class="camera">&#128247;</span><span class="amount">CA$91.05</span></div></div><div class="time">3月7日 15:20</div></div>
+    <div class="item"><div class="row"><div class="left"><span class="title">Costco</span><span class="tag"> #加油</span></div><div class="right"><span class="amount">CA$38.83</span></div></div><div class="time">3月7日 10:05</div></div>
+    <div class="item"><div class="row"><div class="left"><span class="title">Tim Hortons</span><span class="tag"> #餐饮</span></div><div class="right"><span class="amount">CA$7.50</span></div></div><div class="time">3月7日</div></div>
+  </div>
+</div>
+
+<!-- Style B -->
+<div class="phone">
+  <div class="phone-header">
+    <h3>B: 左侧色条 + 浅灰底</h3>
+    <div class="desc">左侧紫色竖条标识分类，有层次但不厚重</div>
+  </div>
+  <div class="phone-body style-b">
+    <div class="day-header"><span>昨天</span><span class="subtotal">CA$6.00</span></div>
+    <div class="item"><div class="row"><div class="left"><span class="title">Royal Botanical Gardens</span><span class="tag"> #娱乐</span></div><div class="right"><span class="camera">&#128247;</span><span class="amount">CA$6.00</span></div></div><div class="time">3月8日 14:30</div></div>
+    <div class="day-header"><span>3月7日 周五</span><span class="subtotal">CA$190.22</span></div>
+    <div class="item"><div class="row"><div class="left"><span class="title">Stone Crock Market</span><span class="tag"> #餐饮</span></div><div class="right"><span class="amount">CA$11.34</span></div></div><div class="time">3月7日 18:45</div></div>
+    <div class="item"><div class="row"><div class="left"><span class="title">T&amp;T SUPERMARKET</span><span class="tag"> #超市</span></div><div class="right"><span class="camera">&#128247;</span><span class="amount">CA$91.05</span></div></div><div class="time">3月7日 15:20</div></div>
+    <div class="item"><div class="row"><div class="left"><span class="title">Costco</span><span class="tag"> #加油</span></div><div class="right"><span class="amount">CA$38.83</span></div></div><div class="time">3月7日 10:05</div></div>
+    <div class="item"><div class="row"><div class="left"><span class="title">Tim Hortons</span><span class="tag"> #餐饮</span></div><div class="right"><span class="amount">CA$7.50</span></div></div><div class="time">3月7日</div></div>
+  </div>
+</div>
+
+<!-- Style C -->
+<div class="phone">
+  <div class="phone-header">
+    <h3>C: 柔和色块卡片</h3>
+    <div class="desc">淡紫色背景色块，无边框，圆润温和</div>
+  </div>
+  <div class="phone-body style-c">
+    <div class="day-header"><span>昨天</span><span class="subtotal">CA$6.00</span></div>
+    <div class="item"><div class="row"><div class="left"><span class="title">Royal Botanical Gardens</span><span class="tag"> #娱乐</span></div><div class="right"><span class="camera">&#128247;</span><span class="amount">CA$6.00</span></div></div><div class="time">3月8日 14:30</div></div>
+    <div class="day-header"><span>3月7日 周五</span><span class="subtotal">CA$190.22</span></div>
+    <div class="item"><div class="row"><div class="left"><span class="title">Stone Crock Market</span><span class="tag"> #餐饮</span></div><div class="right"><span class="amount">CA$11.34</span></div></div><div class="time">3月7日 18:45</div></div>
+    <div class="item"><div class="row"><div class="left"><span class="title">T&amp;T SUPERMARKET</span><span class="tag"> #超市</span></div><div class="right"><span class="camera">&#128247;</span><span class="amount">CA$91.05</span></div></div><div class="time">3月7日 15:20</div></div>
+    <div class="item"><div class="row"><div class="left"><span class="title">Costco</span><span class="tag"> #加油</span></div><div class="right"><span class="amount">CA$38.83</span></div></div><div class="time">3月7日 10:05</div></div>
+    <div class="item"><div class="row"><div class="left"><span class="title">Tim Hortons</span><span class="tag"> #餐饮</span></div><div class="right"><span class="amount">CA$7.50</span></div></div><div class="time">3月7日</div></div>
+  </div>
+</div>
+
+<!-- Style D -->
+<div class="phone">
+  <div class="phone-header">
+    <h3>D: 圆点分类指示器</h3>
+    <div class="desc">左侧彩色小圆点标识分类，底线分隔</div>
+  </div>
+  <div class="phone-body style-d">
+    <div class="day-header"><span>昨天</span><span class="subtotal">CA$6.00</span></div>
+    <div class="item"><div class="dot fun"></div><div class="content"><div class="row"><div class="left"><span class="title">Royal Botanical Gardens</span></div><div class="right"><span class="camera">&#128247;</span><span class="amount">CA$6.00</span></div></div><div class="time">娱乐 &middot; 3月8日 14:30</div></div></div>
+    <div class="day-header"><span>3月7日 周五</span><span class="subtotal">CA$190.22</span></div>
+    <div class="item"><div class="dot food"></div><div class="content"><div class="row"><div class="left"><span class="title">Stone Crock Market</span></div><div class="right"><span class="amount">CA$11.34</span></div></div><div class="time">餐饮 &middot; 3月7日 18:45</div></div></div>
+    <div class="item"><div class="dot market"></div><div class="content"><div class="row"><div class="left"><span class="title">T&amp;T SUPERMARKET</span></div><div class="right"><span class="camera">&#128247;</span><span class="amount">CA$91.05</span></div></div><div class="time">超市 &middot; 3月7日 15:20</div></div></div>
+    <div class="item"><div class="dot gas"></div><div class="content"><div class="row"><div class="left"><span class="title">Costco</span></div><div class="right"><span class="amount">CA$38.83</span></div></div><div class="time">加油 &middot; 3月7日 10:05</div></div></div>
+    <div class="item"><div class="dot food"></div><div class="content"><div class="row"><div class="left"><span class="title">Tim Hortons</span></div><div class="right"><span class="amount">CA$7.50</span></div></div><div class="time">餐饮 &middot; 3月7日</div></div></div>
+  </div>
+</div>
+
+<!-- Style E -->
+<div class="phone">
+  <div class="phone-header">
+    <h3>E: 标签徽章 + 分隔线</h3>
+    <div class="desc">分类以小徽章形式嵌入标题行，紧凑清晰</div>
+  </div>
+  <div class="phone-body style-e">
+    <div class="day-header"><span>昨天</span><span class="subtotal">CA$6.00</span></div>
+    <div class="item"><div class="row"><div class="left"><span class="title">Royal Botanical Gardens</span><span class="badge">娱乐</span></div><div class="right"><span class="camera">&#128247;</span><span class="amount">CA$6.00</span></div></div><div class="time">3月8日 14:30</div></div>
+    <div class="day-header"><span>3月7日 周五</span><span class="subtotal">CA$190.22</span></div>
+    <div class="item"><div class="row"><div class="left"><span class="title">Stone Crock Market</span><span class="badge">餐饮</span></div><div class="right"><span class="amount">CA$11.34</span></div></div><div class="time">3月7日 18:45</div></div>
+    <div class="item"><div class="row"><div class="left"><span class="title">T&amp;T SUPERMARKET</span><span class="badge">超市</span></div><div class="right"><span class="camera">&#128247;</span><span class="amount">CA$91.05</span></div></div><div class="time">3月7日 15:20</div></div>
+    <div class="item"><div class="row"><div class="left"><span class="title">Costco</span><span class="badge">加油</span></div><div class="right"><span class="amount">CA$38.83</span></div></div><div class="time">3月7日 10:05</div></div>
+    <div class="item"><div class="row"><div class="left"><span class="title">Tim Hortons</span><span class="badge">餐饮</span></div><div class="right"><span class="amount">CA$7.50</span></div></div><div class="time">3月7日</div></div>
+  </div>
+</div>
+</div>
+</section>
+
+<!-- ========== Section 2 ========== -->
+<section id="s2" class="demo-section s2">
+<div class="section-heading"><span class="num">02</span> — 差旅费用编辑表单 (trip-item-form-mockups)</div>
+<h1>差旅费用编辑 — 5款设计方案</h1>
+<p style="text-align:center;color:#888;margin-bottom:30px;">统一记账视觉语言：暗色主题、圆角卡片、紫色主色调、紧凑布局</p>
+<div class="grid">
+
+<!-- Design A -->
+<div class="mockup-wrapper">
+  <h2>方案 A：金额优先卡片式</h2>
+  <p>和记账完全统一 — 金额居中大字，币种 chip，下方字段卡片</p>
+  <div class="phone"><div class="phone-screen design-a" style="background:var(--bg);">
+    <div class="header"><span class="header-title">编辑费用</span><span class="header-close">&#10005;</span></div>
+    <div class="scroll-area">
+      <div class="chip-row" style="margin-bottom:10px;"><span class="chip">&#9992;&#65039; 机票</span><span class="chip">&#128644; 火车</span><span class="chip active">&#127976; 住宿</span><span class="chip">&#128661; 打车</span><span class="chip">&#127869; 餐饮</span></div>
+      <div class="amount-section"><input class="amount-input-big" placeholder="0.00" value="328.50"><div class="currency-chips"><span class="currency-chip active">CAD</span><span class="currency-chip">CNY</span><span class="currency-chip">USD</span><span class="currency-chip">HKD</span></div></div>
+      <div class="field-group"><div class="label">标题</div><input class="input-field" value="Marriott Downtown"></div>
+      <div class="field-group" style="margin-bottom:10px;"><div class="label">日期</div><div class="date-card"><span>2026-03-08</span><span class="chevron">&#8250;</span></div></div>
+      <div class="label">票据照片</div><div class="photo-row" style="margin:6px 0 10px;"><div class="photo-thumb" style="background:#4a3a5a;">&#129531;<div class="photo-del">&#10005;</div></div><div class="photo-add">+</div></div>
+      <div class="notes-toggle"><div class="label">备注</div><div class="notes-hint">出差第二天住宿...</div><span class="notes-arrow">&#9662;</span></div>
+    </div>
+    <div class="bottom-bar"><button class="btn-tertiary" style="margin-bottom:8px;">&#10024; 让二狗分析</button><div class="row" style="justify-content:space-between;"><button class="btn-delete">&#128465;</button><div class="row" style="gap:8px;"><button class="btn-secondary">取消</button><button class="btn-primary">保存</button></div></div></div>
+  </div></div>
+</div>
+
+<!-- Design B -->
+<div class="mockup-wrapper">
+  <h2>方案 B：分段卡片式</h2>
+  <p>信息分组为独立卡片，icon 引导，表单感弱、阅读感强</p>
+  <div class="phone"><div class="phone-screen design-b" style="background:var(--bg);">
+    <div class="header"><span class="header-title">编辑费用</span><span class="header-close">&#10005;</span></div>
+    <div class="scroll-area">
+      <div class="chip-row" style="margin-bottom:10px;"><span class="chip">&#9992;&#65039; 机票</span><span class="chip">&#128644; 火车</span><span class="chip active">&#127976; 住宿</span><span class="chip">&#128661; 打车</span><span class="chip">&#127869; 餐饮</span></div>
+      <div class="section-card">
+        <div class="row-item"><span class="icon">&#128221;</span><span class="row-label">标题</span><input placeholder="费用标题" value="Marriott Downtown"></div>
+        <div class="inner-sep"></div>
+        <div class="row-item"><span class="icon">&#128176;</span><span class="row-label">金额</span><input placeholder="0.00" value="328.50" style="text-align:right;"><span style="font-size:12px;color:var(--primary);padding:2px 8px;background:var(--primary-container);border-radius:6px;font-weight:600;">CAD</span></div>
+        <div class="inner-sep"></div>
+        <div class="row-item"><span class="icon">&#128197;</span><span class="row-label">日期</span><span class="row-value">2026-03-08</span><span style="color:var(--on-surface-variant);">&#8250;</span></div>
+      </div>
+      <div class="section-card"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span style="font-size:14px;">&#128248;</span><span class="label" style="margin:0;">票据照片</span></div><div class="photo-row"><div class="photo-thumb" style="background:#4a3a5a;">&#129531;<div class="photo-del">&#10005;</div></div><div class="photo-thumb" style="background:#3a4a5a;">&#128196;<div class="photo-del">&#10005;</div></div><div class="photo-add">+</div></div></div>
+      <div class="section-card"><div style="display:flex;align-items:center;gap:8px;cursor:pointer;"><span style="font-size:14px;">&#128172;</span><span class="label" style="margin:0;flex:1;">备注</span><span style="font-size:11px;color:var(--on-surface-variant);opacity:0.6;">出差第二天住宿...</span><span style="color:var(--on-surface-variant);">&#9662;</span></div></div>
+    </div>
+    <div class="bottom-bar"><button class="btn-tertiary" style="margin-bottom:8px;">&#10024; 让二狗分析</button><div class="row" style="justify-content:space-between;"><button class="btn-delete">&#128465;</button><div class="row" style="gap:8px;"><button class="btn-secondary">取消</button><button class="btn-primary">保存</button></div></div></div>
+  </div></div>
+</div>
+
+<!-- Design C -->
+<div class="mockup-wrapper">
+  <h2>方案 C：极简内联式</h2>
+  <p>金额超大居中，其余字段左标签右输入，iOS 设置页风格</p>
+  <div class="phone"><div class="phone-screen design-c" style="background:var(--bg);">
+    <div class="header"><span class="header-title">编辑费用</span><span class="header-close">&#10005;</span></div>
+    <div class="scroll-area">
+      <div class="chip-row" style="margin-bottom:8px;"><span class="chip">&#9992;&#65039; 机票</span><span class="chip">&#128644; 火车</span><span class="chip active">&#127976; 住宿</span><span class="chip">&#128661; 打车</span><span class="chip">&#127869; 餐饮</span></div>
+      <div class="amount-hero"><span class="cur">CAD</span><br><input placeholder="0.00" value="328.50"></div>
+      <div class="separator"></div>
+      <div class="inline-field"><span class="inline-label">标题</span><input class="inline-input" value="Marriott Downtown"></div>
+      <div class="inline-field"><span class="inline-label">日期</span><input class="inline-input" value="2026-03-08" readonly style="cursor:pointer;"><span class="inline-suffix">&#8250;</span></div>
+      <div class="inline-field"><span class="inline-label">币种</span><span class="inline-input" style="text-align:right;color:var(--primary);font-weight:600;">CAD &#9662;</span></div>
+      <div class="separator"></div>
+      <div class="inline-field" style="border:none;flex-direction:column;align-items:flex-start;gap:8px;"><span class="inline-label" style="width:auto;">票据照片</span><div class="photo-row"><div class="photo-thumb" style="background:#4a3a5a;">&#129531;<div class="photo-del">&#10005;</div></div><div class="photo-add">+</div></div></div>
+      <div class="separator"></div>
+      <div class="inline-field" style="border:none;cursor:pointer;"><span class="inline-label">备注</span><span class="inline-input" style="color:var(--on-surface-variant);opacity:0.6;font-size:12px;">出差第二天住宿... &#9662;</span></div>
+    </div>
+    <div class="bottom-bar"><button class="btn-tertiary" style="margin-bottom:8px;">&#10024; 让二狗分析</button><div class="row" style="justify-content:space-between;"><button class="btn-delete">&#128465;</button><div class="row" style="gap:8px;"><button class="btn-secondary">取消</button><button class="btn-primary">保存</button></div></div></div>
+  </div></div>
+</div>
+
+<!-- Design D -->
+<div class="mockup-wrapper">
+  <h2>方案 D：双列网格式</h2>
+  <p>字段以网格块排列，信息密度高，一览无余</p>
+  <div class="phone"><div class="phone-screen design-d" style="background:var(--bg);">
+    <div class="header"><span class="header-title">编辑费用</span><span class="header-close">&#10005;</span></div>
+    <div class="scroll-area">
+      <div class="chip-row" style="margin-bottom:10px;"><span class="chip">&#9992;&#65039; 机票</span><span class="chip">&#128644; 火车</span><span class="chip active">&#127976; 住宿</span><span class="chip">&#128661; 打车</span><span class="chip">&#127869; 餐饮</span></div>
+      <div class="form-grid">
+        <div class="grid-field full"><div class="gf-label">标题</div><input placeholder="费用标题" value="Marriott Downtown"></div>
+        <div class="grid-field"><div class="gf-label">金额</div><input placeholder="0.00" value="328.50"></div>
+        <div class="grid-field"><div class="gf-label">币种</div><div class="gf-value" style="display:flex;align-items:center;gap:4px;cursor:pointer;"><span style="color:var(--primary);">CAD</span><span style="font-size:10px;color:var(--on-surface-variant);">&#9662;</span></div></div>
+        <div class="grid-field"><div class="gf-label">日期</div><div class="gf-value" style="cursor:pointer;">2026-03-08</div></div>
+        <div class="grid-field"><div class="gf-label">报销状态</div><div class="gf-value" style="color:var(--tertiary);">待报销</div></div>
+        <div class="grid-field full"><div class="gf-label">票据照片</div><div class="photo-row" style="margin-top:4px;"><div class="photo-thumb" style="width:48px;height:48px;background:#4a3a5a;font-size:18px;">&#129531;<div class="photo-del" style="width:14px;height:14px;font-size:8px;">&#10005;</div></div><div class="photo-thumb" style="width:48px;height:48px;background:#3a4a5a;font-size:18px;">&#128196;<div class="photo-del" style="width:14px;height:14px;font-size:8px;">&#10005;</div></div><div class="photo-add" style="width:48px;height:48px;font-size:16px;">+</div></div></div>
+        <div class="grid-field full" style="cursor:pointer;"><div style="display:flex;align-items:center;justify-content:space-between;"><div class="gf-label" style="margin:0;">备注</div><span style="font-size:11px;color:var(--on-surface-variant);opacity:0.6;">出差第二天住宿... &#9662;</span></div></div>
+      </div>
+    </div>
+    <div class="bottom-bar"><button class="btn-tertiary" style="margin-bottom:8px;">&#10024; 让二狗分析</button><div class="row" style="justify-content:space-between;"><button class="btn-delete">&#128465;</button><div class="row" style="gap:8px;"><button class="btn-secondary">取消</button><button class="btn-primary">保存</button></div></div></div>
+  </div></div>
+</div>
+
+<!-- Design E -->
+<div class="mockup-wrapper">
+  <h2>方案 E：分栏标签式</h2>
+  <p>基本信息/附件 分 tab，单 tab 内容极少，无需滚动</p>
+  <div class="phone"><div class="phone-screen design-e" style="background:var(--bg);">
+    <div class="header"><span class="header-title">编辑费用</span><span class="header-close">&#10005;</span></div>
+    <div class="scroll-area">
+      <div class="chip-row" style="margin-bottom:10px;"><span class="chip">&#9992;&#65039; 机票</span><span class="chip">&#128644; 火车</span><span class="chip active">&#127976; 住宿</span><span class="chip">&#128661; 打车</span><span class="chip">&#127869; 餐饮</span></div>
+      <div class="amount-bar"><span class="cur-tag">CAD</span><input placeholder="0.00" value="328.50"></div>
+      <div class="tab-bar"><div class="tab active">基本信息</div><div class="tab">附件 &amp; 备注</div></div>
+      <div class="pill-field"><span class="pf-icon">&#128221;</span><span class="pf-label">标题</span><input value="Marriott Downtown"></div>
+      <div class="pill-field"><span class="pf-icon">&#128197;</span><span class="pf-label">日期</span><input value="2026-03-08" readonly style="cursor:pointer;"><span class="pf-right">&#8250;</span></div>
+      <div class="pill-field"><span class="pf-icon">&#128177;</span><span class="pf-label">币种</span><input value="CAD" readonly style="color:var(--primary);font-weight:600;cursor:pointer;"><span class="pf-right">&#9662;</span></div>
+      <div class="pill-field"><span class="pf-icon">&#128203;</span><span class="pf-label">状态</span><span style="flex:1;font-size:13px;color:var(--tertiary);">待报销</span><span class="pf-right">&#8250;</span></div>
+    </div>
+    <div class="bottom-bar"><button class="btn-tertiary" style="margin-bottom:8px;">&#10024; 让二狗分析</button><div class="row" style="justify-content:space-between;"><button class="btn-delete">&#128465;</button><div class="row" style="gap:8px;"><button class="btn-secondary">取消</button><button class="btn-primary">保存</button></div></div></div>
+  </div></div>
+</div>
+
+</div><!-- /grid -->
+
+<div style="max-width:900px;margin:40px auto;background:#2c2c2e;border-radius:16px;padding:24px;color:#e5e5e7;">
+  <h3 style="margin-bottom:12px;">方案对比</h3>
+  <table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <thead><tr style="border-bottom:1px solid #48484a;text-align:left;"><th style="padding:8px;">方案</th><th style="padding:8px;">核心理念</th><th style="padding:8px;">与记账统一度</th><th style="padding:8px;">一屏可见</th><th style="padding:8px;">适合场景</th></tr></thead>
+    <tbody>
+      <tr style="border-bottom:1px solid #38383a;"><td style="padding:8px;color:#a78bfa;font-weight:600;">A 金额优先</td><td style="padding:8px;">金额大字居中 + 下方表单</td><td style="padding:8px;">&#11088;&#11088;&#11088;&#11088;&#11088;</td><td style="padding:8px;">&#9989;</td><td style="padding:8px;">追求和记账完全一致体验</td></tr>
+      <tr style="border-bottom:1px solid #38383a;"><td style="padding:8px;color:#a78bfa;font-weight:600;">B 分段卡片</td><td style="padding:8px;">信息分组，icon 引导</td><td style="padding:8px;">&#11088;&#11088;&#11088;&#11088;</td><td style="padding:8px;">&#9989;</td><td style="padding:8px;">字段多时层次清晰</td></tr>
+      <tr style="border-bottom:1px solid #38383a;"><td style="padding:8px;color:#a78bfa;font-weight:600;">C 极简内联</td><td style="padding:8px;">iOS 设置页风格，左右对齐</td><td style="padding:8px;">&#11088;&#11088;&#11088;</td><td style="padding:8px;">&#9989;</td><td style="padding:8px;">追求极致简洁</td></tr>
+      <tr style="border-bottom:1px solid #38383a;"><td style="padding:8px;color:#a78bfa;font-weight:600;">D 双列网格</td><td style="padding:8px;">信息密度最高，一览无余</td><td style="padding:8px;">&#11088;&#11088;&#11088;</td><td style="padding:8px;">&#9989;&#9989;</td><td style="padding:8px;">字段多且需同时看全</td></tr>
+      <tr><td style="padding:8px;color:#a78bfa;font-weight:600;">E 分栏标签</td><td style="padding:8px;">Tab 分页，每页极少内容</td><td style="padding:8px;">&#11088;&#11088;&#11088;</td><td style="padding:8px;">&#9989;&#9989;&#9989;</td><td style="padding:8px;">字段特别多时避免滚动</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:12px;color:#9a9a9e;font-size:12px;">推荐：方案 A（和记账统一度最高）或 方案 B（信息层次更清晰）</p>
+</div>
+</section>
+
+<!-- ========== Section 3 ========== -->
+<section id="s3" class="demo-section s3">
+<div class="section-heading"><span class="num">03</span> — 记账Dialog重设计 (expense-dialog-redesign)</div>
+<div style="display:flex;flex-wrap:wrap;gap:24px;justify-content:center">
+
+<!-- 新建（空白） -->
+<div>
+  <div class="section-label">新建（空白）</div>
+  <div class="section-desc">手动点 + 新增，可输入描述让二狗分析</div>
+  <div class="phone"><div class="dialog">
+    <div class="header"><h2>记一笔</h2><div class="close">&times;</div></div>
+    <div class="label">标题</div><input class="input-field" placeholder="消费标题..."><div class="sp-12"></div>
+    <div class="amount-line"><span class="label">金额</span><input class="input-field" placeholder="0.00" style="flex:1;"><div class="chip-row"><div class="chip active">CAD</div><div class="chip">CNY</div></div></div><div class="sp-12"></div>
+    <div class="label">日期 / 时间</div>
+    <div class="datetime-row"><div class="date-bar"><span>2026/03/09</span><span class="arrow">&#8250;</span></div><div class="time-bar empty"><span class="clock">&#128339;</span><span>票据时间</span></div></div><div class="sp-12"></div>
+    <div class="label">描述</div><div class="desc-wrap"><textarea class="input-field" rows="2" placeholder="在这里输入大段文字，二狗会智能提取标题、金额、明细..."></textarea></div><div class="sp-12"></div>
+    <div class="label">票据照片</div><div class="sp-4"></div><div class="photo-row"><div class="add-photo">+</div></div><div class="sp-16"></div>
+    <div class="btn-ai-row"><div class="btn-ai">让二狗分析</div></div>
+    <div class="btn-row"><div class="btn btn-cancel">取消</div><div class="btn btn-save">保存</div></div>
+  </div></div>
+</div>
+
+<!-- AI 分析后（英文票据） -->
+<div>
+  <div class="section-label">AI 分析后（英文票据）</div>
+  <div class="section-desc">英文原始 + 中文翻译</div>
+  <div class="phone"><div class="dialog">
+    <div class="header"><h2>记一笔</h2><div class="close">&times;</div></div>
+    <div class="label">标题</div><input class="input-field" value="T&amp;T SUPERMARKET"><div class="sp-12"></div>
+    <div class="amount-line"><span class="label">金额</span><input class="input-field" value="91.05" style="flex:1;"><div class="chip-row"><div class="chip active">CAD</div><div class="chip">CNY</div></div></div><div class="sp-12"></div>
+    <div class="label">日期 / 时间</div>
+    <div class="datetime-row"><div class="date-bar"><span>2026/03/07</span><span class="arrow">&#8250;</span></div><div class="time-bar"><span class="clock">&#128339;</span><span>15:20</span></div></div><div class="sp-12"></div>
+    <div class="label">明细</div><div class="sp-4"></div>
+    <div class="items-card">
+      <div class="items-header"><span>3 项商品</span><span class="total">CA$91.05</span></div>
+      <div class="item-row"><div class="item-left"><div class="item-name-orig">Frozen Shrimp Wonton <span class="tag-sm tag-orig">原始</span></div><div class="item-name-trans">鲜虾云吞 <span class="tag-sm tag-cn">中文翻译</span></div></div><div class="item-right"><span class="item-qty">x2</span><span class="item-amt">$13.98</span></div></div>
+      <div class="item-row"><div class="item-left"><div class="item-name-orig">Organic Milk 1L <span class="tag-sm tag-orig">原始</span></div><div class="item-name-trans">有机牛奶 1L <span class="tag-sm tag-cn">中文翻译</span></div></div><div class="item-right"><span class="item-qty">x3</span><span class="item-amt">$20.97</span></div></div>
+      <div class="item-row"><div class="item-left"><div class="item-name-orig">Salmon Sashimi Grade <span class="tag-sm tag-orig">原始</span></div><div class="item-name-trans">三文鱼刺身 <span class="tag-sm tag-cn">中文翻译</span></div></div><div class="item-right"><span class="item-qty">x1</span><span class="item-amt">$56.10</span></div></div>
+    </div><div class="sp-12"></div>
+    <div class="label">描述</div><div class="desc-wrap"><textarea class="input-field" rows="2">周末大统华采买，虾饺牛奶刺身入手。食不厌精，脍不厌细。</textarea><div class="desc-toggle" onclick="this.parentElement.classList.toggle('expanded');this.textContent=this.parentElement.classList.contains('expanded')?'收起':'展开'">展开</div></div><div class="sp-12"></div>
+    <div class="label">票据照片</div><div class="sp-4"></div><div class="photo-row"><div class="photo-thumb"><div class="x">&times;</div></div><div class="add-photo">+</div></div><div class="sp-16"></div>
+    <div class="btn-ai-row"><div class="btn-ai">让二狗分析</div></div>
+    <div class="btn-row"><div class="btn btn-cancel">取消</div><div class="btn btn-save">保存</div></div>
+  </div></div>
+</div>
+
+<!-- AI 分析后（中文票据） -->
+<div>
+  <div class="section-label">AI 分析后（中文票据）</div>
+  <div class="section-desc">中文原始 + 英文翻译</div>
+  <div class="phone"><div class="dialog">
+    <div class="header"><h2>记一笔</h2><div class="close">&times;</div></div>
+    <div class="label">标题</div><input class="input-field" value="盒马鲜生"><div class="sp-12"></div>
+    <div class="amount-line"><span class="label">金额</span><input class="input-field" value="156.80" style="flex:1;"><div class="chip-row"><div class="chip">CAD</div><div class="chip active">CNY</div></div></div><div class="sp-12"></div>
+    <div class="label">日期 / 时间</div>
+    <div class="datetime-row"><div class="date-bar"><span>2026/03/08</span><span class="arrow">&#8250;</span></div><div class="time-bar"><span class="clock">&#128339;</span><span>18:45</span></div></div><div class="sp-12"></div>
+    <div class="label">明细</div><div class="sp-4"></div>
+    <div class="items-card">
+      <div class="items-header"><span>3 项商品</span><span class="total">&#165;156.80</span></div>
+      <div class="item-row"><div class="item-left"><div class="item-name-orig">东坡红烧肉 <span class="tag-sm tag-orig">原始</span></div><div class="item-name-trans">Dongpo Braised Pork <span class="tag-sm tag-en">英文翻译</span></div></div><div class="item-right"><span class="item-qty">x1</span><span class="item-amt">&#165;68.00</span></div></div>
+      <div class="item-row"><div class="item-left"><div class="item-name-orig">澳洲谷饲牛腱 500g <span class="tag-sm tag-orig">原始</span></div><div class="item-name-trans">Aus Grain-fed Beef Shank 500g <span class="tag-sm tag-en">英文翻译</span></div></div><div class="item-right"><span class="item-qty">x1</span><span class="item-amt">&#165;55.80</span></div></div>
+      <div class="item-row"><div class="item-left"><div class="item-name-orig">日日鲜脱脂牛奶 1L <span class="tag-sm tag-orig">原始</span></div><div class="item-name-trans">Daily Fresh Skim Milk 1L <span class="tag-sm tag-en">英文翻译</span></div></div><div class="item-right"><span class="item-qty">x2</span><span class="item-amt">&#165;33.00</span></div></div>
+    </div><div class="sp-12"></div>
+    <div class="label">描述</div><div class="desc-wrap"><textarea class="input-field" rows="2">盒马晚市采买，红烧肉牛腱鲜奶齐备。治大国若烹小鲜，先从厨房开始。</textarea><div class="desc-toggle" onclick="this.parentElement.classList.toggle('expanded');this.textContent=this.parentElement.classList.contains('expanded')?'收起':'展开'">展开</div></div><div class="sp-12"></div>
+    <div class="label">票据照片</div><div class="sp-4"></div><div class="photo-row"><div class="photo-thumb"><div class="x">&times;</div></div><div class="add-photo">+</div></div><div class="sp-16"></div>
+    <div class="btn-ai-row"><div class="btn-ai">让二狗分析</div></div>
+    <div class="btn-row"><div class="btn btn-cancel">取消</div><div class="btn btn-save">保存</div></div>
+  </div></div>
+</div>
+
+<!-- 编辑已有记录 -->
+<div>
+  <div class="section-label">编辑已有记录</div>
+  <div class="section-desc">从列表点入，底部有删除按钮，无"让二狗分析"</div>
+  <div class="phone"><div class="dialog">
+    <div class="header"><h2>编辑账单</h2><div class="close">&times;</div></div>
+    <div class="label">标题</div><input class="input-field" value="T&amp;T SUPERMARKET"><div class="sp-12"></div>
+    <div class="amount-line"><span class="label">金额</span><input class="input-field" value="91.05" style="flex:1;"><div class="chip-row"><div class="chip active">CAD</div><div class="chip">CNY</div></div></div><div class="sp-12"></div>
+    <div class="label">日期 / 时间</div>
+    <div class="datetime-row"><div class="date-bar"><span>2026/03/07</span><span class="arrow">&#8250;</span></div><div class="time-bar"><span class="clock">&#128339;</span><span>15:20</span></div></div><div class="sp-12"></div>
+    <div class="label">明细</div><div class="sp-4"></div>
+    <div class="items-card">
+      <div class="items-header"><span>3 项商品</span><span class="total">CA$91.05</span></div>
+      <div class="item-row"><div class="item-left"><div class="item-name-orig">Frozen Shrimp Wonton <span class="tag-sm tag-orig">原始</span></div><div class="item-name-trans">鲜虾云吞 <span class="tag-sm tag-cn">中文翻译</span></div></div><div class="item-right"><span class="item-qty">x2</span><span class="item-amt">$13.98</span></div></div>
+      <div class="item-row"><div class="item-left"><div class="item-name-orig">Organic Milk 1L <span class="tag-sm tag-orig">原始</span></div><div class="item-name-trans">有机牛奶 1L <span class="tag-sm tag-cn">中文翻译</span></div></div><div class="item-right"><span class="item-qty">x3</span><span class="item-amt">$20.97</span></div></div>
+      <div class="item-row"><div class="item-left"><div class="item-name-orig">Salmon Sashimi Grade <span class="tag-sm tag-orig">原始</span></div><div class="item-name-trans">三文鱼刺身 <span class="tag-sm tag-cn">中文翻译</span></div></div><div class="item-right"><span class="item-qty">x1</span><span class="item-amt">$56.10</span></div></div>
+    </div><div class="sp-12"></div>
+    <div class="label">描述</div><div class="desc-wrap"><textarea class="input-field" rows="2">大统华周五采购，虾饺牛奶刺身备货。</textarea><div class="desc-toggle" onclick="this.parentElement.classList.toggle('expanded');this.textContent=this.parentElement.classList.contains('expanded')?'收起':'展开'">展开</div></div><div class="sp-12"></div>
+    <div class="label">票据照片</div><div class="sp-4"></div><div class="photo-row"><div class="photo-thumb"><div class="x">&times;</div></div><div class="photo-thumb"><div class="x">&times;</div></div><div class="add-photo">+</div></div><div class="sp-16"></div>
+    <div class="btn-ai-row"><div class="btn-ai">让二狗分析</div></div>
+    <div class="btn-row"><div class="btn btn-delete">删除</div><div class="btn btn-cancel">取消</div><div class="btn btn-save">保存</div></div>
+  </div></div>
+</div>
+
+<!-- 编辑（无时间/无明细） -->
+<div>
+  <div class="section-label">编辑（无时间/无明细）</div>
+  <div class="section-desc">手动录入的简单账单，无明细无时间</div>
+  <div class="phone"><div class="dialog">
+    <div class="header"><h2>编辑账单</h2><div class="close">&times;</div></div>
+    <div class="label">标题</div><input class="input-field" value="Tim Hortons"><div class="sp-12"></div>
+    <div class="amount-line"><span class="label">金额</span><input class="input-field" value="7.50" style="flex:1;"><div class="chip-row"><div class="chip active">CAD</div><div class="chip">CNY</div></div></div><div class="sp-12"></div>
+    <div class="label">日期 / 时间</div>
+    <div class="datetime-row"><div class="date-bar"><span>2026/03/07</span><span class="arrow">&#8250;</span></div><div class="time-bar empty"><span class="clock">&#128339;</span><span>票据时间</span></div></div><div class="sp-12"></div>
+    <div class="label">描述</div><div class="desc-wrap"><textarea class="input-field" rows="2" placeholder="添加描述..."></textarea></div><div class="sp-12"></div>
+    <div class="label">票据照片</div><div class="sp-4"></div><div class="photo-row"><div class="add-photo">+</div></div><div class="sp-16"></div>
+    <div class="btn-ai-row"><div class="btn-ai">让二狗分析</div></div>
+    <div class="btn-row"><div class="btn btn-delete">删除</div><div class="btn btn-cancel">取消</div><div class="btn btn-save">保存</div></div>
+  </div></div>
+</div>
+
+</div>
+</section>
+
+<!-- ========== Section 4 ========== -->
+<section id="s4" class="demo-section s4">
+<div class="section-heading"><span class="num">04</span> — 分析按钮样式对比 (analyze-button-styles)</div>
+<div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center">
+<div><div class="card-label">A — 当前样式</div><div class="card-desc">tertiary 灰绿，容易看成禁用状态</div><div class="card"><div class="section"><div class="section-title">标题</div><div class="field">T&amp;T SUPERMARKET</div></div><div class="section"><div class="section-title">金额</div><div class="field">91.05 &nbsp; CAD</div></div><div class="btn-ai-a">&#128054; 让二狗分析</div><div class="btn-row"><div class="btn btn-cancel">取消</div><div class="btn btn-save">保存</div></div></div></div>
+<div><div class="card-label">B — 渐变紫</div><div class="card-desc">和主色（保存按钮）同色系，辨识度高</div><div class="card"><div class="section"><div class="section-title">标题</div><div class="field">T&amp;T SUPERMARKET</div></div><div class="section"><div class="section-title">金额</div><div class="field">91.05 &nbsp; CAD</div></div><div class="btn-ai-b">&#128054; 让二狗分析</div><div class="btn-row"><div class="btn btn-cancel">取消</div><div class="btn btn-save">保存</div></div></div></div>
+<div><div class="card-label">C — 深绿色</div><div class="card-desc">和保存区分开，AI感强</div><div class="card"><div class="section"><div class="section-title">标题</div><div class="field">T&amp;T SUPERMARKET</div></div><div class="section"><div class="section-title">金额</div><div class="field">91.05 &nbsp; CAD</div></div><div class="btn-ai-c">&#128054; 让二狗分析</div><div class="btn-row"><div class="btn btn-cancel">取消</div><div class="btn btn-save">保存</div></div></div></div>
+<div><div class="card-label">D — 主色描边</div><div class="card-desc">不抢保存按钮的视觉优先级，但明确可点</div><div class="card"><div class="section"><div class="section-title">标题</div><div class="field">T&amp;T SUPERMARKET</div></div><div class="section"><div class="section-title">金额</div><div class="field">91.05 &nbsp; CAD</div></div><div class="btn-ai-d">&#128054; 让二狗分析</div><div class="btn-row"><div class="btn btn-cancel">取消</div><div class="btn btn-save">保存</div></div></div></div>
+<div><div class="card-label">E — 渐变蓝绿</div><div class="card-desc">明亮有活力，和紫色主色对比鲜明</div><div class="card"><div class="section"><div class="section-title">标题</div><div class="field">T&amp;T SUPERMARKET</div></div><div class="section"><div class="section-title">金额</div><div class="field">91.05 &nbsp; CAD</div></div><div class="btn-ai-e">&#128054; 让二狗分析</div><div class="btn-row"><div class="btn btn-cancel">取消</div><div class="btn btn-save">保存</div></div></div></div>
+</div>
+</section>
+
+<!-- ========== Section 5 ========== -->
+<section id="s5" class="demo-section s5">
+<div class="section-heading"><span class="num">05</span> — 分析按钮状态变化 (analyze-button-states)</div>
+<div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center">
+<div><div class="card-label">正常态</div><div class="card-desc">渐变紫，点击即可分析</div><div class="card"><div class="section"><div class="section-title">标题</div><div class="field">T&amp;T SUPERMARKET</div></div><div class="section"><div class="section-title">金额</div><div class="field">91.05 &nbsp; CAD</div></div><div class="btn-ai normal">让二狗分析</div><div class="btn-row"><div class="btn btn-cancel">取消</div><div class="btn btn-save">保存</div></div></div></div>
+<div><div class="card-label">A — 呼吸脉冲</div><div class="card-desc">浅紫描边 + 整体呼吸闪烁</div><div class="card"><div class="section"><div class="section-title">标题</div><div class="field">T&amp;T SUPERMARKET</div></div><div class="section"><div class="section-title">金额</div><div class="field">91.05 &nbsp; CAD</div></div><div class="btn-ai loading-a"><span class="spinner"></span> 二狗分析中<span class="dots"></span></div><div class="btn-row"><div class="btn btn-cancel">取消</div><div class="btn btn-save" style="opacity:0.5;">保存</div></div></div></div>
+<div><div class="card-label">B — 渐变流动</div><div class="card-desc">紫色渐变左右流动，保持醒目</div><div class="card"><div class="section"><div class="section-title">标题</div><div class="field">T&amp;T SUPERMARKET</div></div><div class="section"><div class="section-title">金额</div><div class="field">91.05 &nbsp; CAD</div></div><div class="btn-ai loading-b"><span class="spinner"></span> 二狗分析中<span class="dots"></span></div><div class="btn-row"><div class="btn btn-cancel">取消</div><div class="btn btn-save" style="opacity:0.5;">保存</div></div></div></div>
+<div><div class="card-label">C — 底部进度线</div><div class="card-desc">白底描边 + 底部紫色进度条滑动</div><div class="card"><div class="section"><div class="section-title">标题</div><div class="field">T&amp;T SUPERMARKET</div></div><div class="section"><div class="section-title">金额</div><div class="field">91.05 &nbsp; CAD</div></div><div class="btn-ai loading-c"><span class="spinner"></span> 二狗分析中<span class="dots"></span></div><div class="btn-row"><div class="btn btn-cancel">取消</div><div class="btn btn-save" style="opacity:0.5;">保存</div></div></div></div>
+<div><div class="card-label">D — 浅紫填充</div><div class="card-desc">简洁浅紫底 + spinner，最低调</div><div class="card"><div class="section"><div class="section-title">标题</div><div class="field">T&amp;T SUPERMARKET</div></div><div class="section"><div class="section-title">金额</div><div class="field">91.05 &nbsp; CAD</div></div><div class="btn-ai loading-d"><span class="spinner"></span> 二狗分析中<span class="dots"></span></div><div class="btn-row"><div class="btn btn-cancel">取消</div><div class="btn btn-save" style="opacity:0.5;">保存</div></div></div></div>
+</div>
+</section>
+
+<!-- ========== Section 6 ========== -->
+<section id="s6" class="demo-section s6">
+<div class="section-heading"><span class="num">06</span> — Todo项重设计 (todo-item-redesign)</div>
+<div style="display:flex;flex-wrap:wrap;gap:24px;justify-content:center">
+<!-- 现有设计 -->
+<div class="phone">
+  <div class="phone-header"><h3>现有设计（对照）</h3><div class="desc">白底卡片 + Checkbox + 四象限圆点 + SuggestionChip标签</div></div>
+  <div class="phone-body current">
+    <div class="item"><div class="checkbox"><input type="checkbox"></div><div class="quad-dot" style="background:#ef4444"></div><div class="content"><div class="title">完成项目方案书</div><div class="due warn">2026-03-10</div><div class="tags"><span class="chip">工作</span><span class="chip">重要</span></div></div><div class="progress-ring"><svg viewBox="0 0 32 32"><circle class="ring-track" cx="16" cy="16" r="12"/><circle class="ring-fill" cx="16" cy="16" r="12" stroke-dasharray="75.4" stroke-dashoffset="22.6"/></svg><div class="progress-num">70</div></div></div>
+    <div class="item"><div class="checkbox"><input type="checkbox"></div><div class="quad-dot" style="background:#f59e0b"></div><div class="content"><div class="title">读《系统设计面试》第3章</div><div class="due">2026-03-15</div><div class="tags"><span class="chip">学习</span></div></div><div class="progress-ring"><svg viewBox="0 0 32 32"><circle class="ring-track" cx="16" cy="16" r="12"/><circle class="ring-fill" cx="16" cy="16" r="12" stroke-dasharray="75.4" stroke-dashoffset="52.8"/></svg><div class="progress-num">30</div></div></div>
+    <div class="item"><div class="checkbox"><input type="checkbox"></div><div class="content"><div class="title">买牛奶和鸡蛋</div><div class="tags"><span class="chip">生活</span></div></div></div>
+    <div class="item"><div class="checkbox"><input type="checkbox"></div><div class="quad-dot" style="background:#3b82f6"></div><div class="content"><div class="title">回复客户邮件</div><div class="due warn">2026-03-09</div><div class="tags"><span class="chip">工作</span></div></div></div>
+    <div class="item completed"><div class="checkbox"><input type="checkbox" checked></div><div class="content"><div class="title">提交周报</div><div class="tags"><span class="chip">工作</span></div></div></div>
+  </div>
+</div>
+
+<!-- 新设计 -->
+<div class="phone">
+  <div class="phone-header"><h3>新设计</h3><div class="desc">淡紫底色 + Checkbox + 建立时间 + 右侧圆环百分比</div></div>
+  <div class="phone-body new">
+    <div class="item"><div class="checkbox"><input type="checkbox"></div><div class="content"><div class="title">完成项目方案书</div><div class="subtitle">建立时间：3月7日 09:30</div></div><div class="progress-ring"><svg viewBox="0 0 32 32"><circle class="ring-track" cx="16" cy="16" r="12"/><circle class="ring-fill" cx="16" cy="16" r="12" stroke-dasharray="75.4" stroke-dashoffset="22.6"/></svg><div class="progress-num">70</div></div></div>
+    <div class="item"><div class="checkbox"><input type="checkbox"></div><div class="content"><div class="title">读《系统设计面试》第3章</div><div class="subtitle">建立时间：3月5日 14:15</div></div><div class="progress-ring"><svg viewBox="0 0 32 32"><circle class="ring-track" cx="16" cy="16" r="12"/><circle class="ring-fill" cx="16" cy="16" r="12" stroke-dasharray="75.4" stroke-dashoffset="52.8"/></svg><div class="progress-num">30</div></div></div>
+    <div class="item"><div class="checkbox"><input type="checkbox"></div><div class="content"><div class="title">买牛奶和鸡蛋</div><div class="subtitle">建立时间：3月9日 08:00</div></div></div>
+    <div class="item"><div class="checkbox"><input type="checkbox"></div><div class="content"><div class="title">回复客户邮件</div><div class="subtitle">建立时间：3月8日 16:40</div></div></div>
+    <div class="item completed"><div class="checkbox"><input type="checkbox" checked></div><div class="content"><div class="title">提交周报</div><div class="subtitle">建立时间：3月6日 10:00</div></div></div>
+  </div>
+</div>
+</div>
+</section>
+
+<!-- ========== Section 7 (NEW) ========== -->
+<section id="s7" class="demo-section s7">
+<div class="section-heading"><span class="num">07</span> — 记账分析填充效果 (expense-analysis-fill)</div>
+<div style="display:flex;flex-wrap:wrap;gap:32px;justify-content:center;align-items:flex-start">
+
+<div class="phone">
+  <div class="version-label">AI 分析填充后 — 记账弹窗</div>
+  <div class="dialog">
+    <!-- Header -->
+    <div class="hdr">
+      <h2>记一笔</h2>
+      <button class="x">&times;</button>
+    </div>
+
+    <!-- Title -->
+    <div class="grp">
+      <div class="lbl">标题</div>
+      <input class="f ok" value="Dollarama" readonly>
+    </div>
+
+    <!-- Amount row -->
+    <div class="grp">
+      <div class="lbl">金额</div>
+      <div class="amt-row">
+        <input class="f ok" value="31.64" readonly>
+        <div class="chips">
+          <span class="c on">CAD</span>
+          <span class="c">CNY</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Date / Time -->
+    <div class="grp">
+      <div class="lbl">日期 / 时间</div>
+      <div style="height:3px"></div>
+      <div class="dt-row">
+        <div class="bar date">
+          <span>&#128197; 2026-03-09</span>
+          <span class="arr">&#8250;</span>
+        </div>
+        <div class="bar">
+          <span>&#128339;</span>
+          <span>20:39</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Items card -->
+    <div class="grp">
+      <div class="lbl">明细</div>
+      <div style="height:3px"></div>
+      <div class="card">
+        <div class="card-hd">8 项商品 + 1 项税费</div>
+
+        <!-- Product rows -->
+        <div class="row">
+          <div>
+            <div class="n">LIGHTERS <span class="tag orig">原始</span></div>
+            <div class="sp">打火机 <span class="tag tr">中文翻译</span></div>
+          </div>
+          <div class="a">2.50</div>
+        </div>
+        <div class="row">
+          <div>
+            <div class="n">SKETCHBOOK <span class="tag orig">原始</span></div>
+            <div class="sp">素描本 <span class="tag tr">中文翻译</span></div>
+          </div>
+          <div class="a">1.75</div>
+        </div>
+        <div class="row">
+          <div>
+            <div class="n">VEGGIE KIT <span class="tag orig">原始</span></div>
+            <div class="sp">蔬菜种植套件 <span class="tag tr">中文翻译</span></div>
+          </div>
+          <div class="a">3.25</div>
+        </div>
+        <div class="row">
+          <div><div class="n" style="color:#aaa">... 其余 5 项商品 ...</div></div>
+          <div class="a" style="color:#aaa">...</div>
+        </div>
+
+        <!-- Subtotal -->
+        <div class="sub">
+          <span>小计（8项）</span>
+          <span>$28.00</span>
+        </div>
+
+        <!-- Tax -->
+        <div class="row tax">
+          <div>
+            <div class="n">&#127991;&#65039; HST (13%) <span class="tag" style="background:#FFF9C4;color:#F57F17">税费</span></div>
+          </div>
+          <div class="a">3.64</div>
+        </div>
+
+        <!-- Total -->
+        <div class="tot">
+          <span class="tl">&#128176; 总计</span>
+          <span class="ta">$31.64 CAD</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="grp">
+      <div class="lbl">描述</div>
+      <div style="height:3px"></div>
+      <div class="desc">在Dollarama购买打火机、素描本、蔬菜种植套件等日用杂货</div>
+    </div>
+
+    <!-- Buttons -->
+    <button class="abtn">让二狗分析</button>
+    <div class="acts">
+      <button class="can">取消</button>
+      <button class="sav">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Design notes -->
+<div class="note" style="max-width:380px;align-self:flex-start;margin-top:8px">
+  <b>设计要点：</b><br>
+  1. 标题/金额输入框高度与货币 chip 等高（32px），薄边框 1px #ddd，填充后变紫边 + #FAFAFF 背景<br>
+  2. 货币 chip 圆角 6px（非 16px），方正紧凑<br>
+  3. 明细顺序：商品行 &#8594; 小计（灰底） &#8594; 税费（浅黄底） &#8594; 总计（紫色渐变底）<br>
+  4. 税费行用 #FFFDE7 背景 + #F57F17 琥珀色文字<br>
+  5. 总计行用 EDE9FE&#8594;E0E7FF 渐变 + #6D28D9 深紫文字<br>
+  6. 日期格式 yyyy-MM-dd，日期栏 flex:1，时间栏固定宽度<br>
+  7. 商品行双行：英文原名 + [原始] 标签，中文翻译 + [中文翻译] 标签
+</div>
+
+</div>
+</section>
+
+<section id="s8" class="demo-section s8">
+<h2 class="section-heading"><span class="num">08</span> 学习场景 — Bottom Sheet + 回收站</h2>
+
+<p style="font-size:13px;color:#888;margin-bottom:16px">
+  长按 → Bottom Sheet（编辑/分享/归档/删除）；左下角垃圾桶可恢复最近100条。<br>
+  <b>试试长按卡片，或点左下角垃圾桶。</b>
+</p>
+
+<!-- ===== Phone A: 主列表 ===== -->
+<div style="display:inline-flex;gap:16px;flex-wrap:wrap">
+
+<div style="width:375px;height:720px;border-radius:24px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.12);background:#1a1a2e;position:relative;display:flex;flex-direction:column">
+  <!-- header -->
+  <div style="padding:16px 16px 8px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+    <span style="font-size:16px;font-weight:700;color:#fff">学习场景</span>
+    <span style="font-size:12px;color:#888">长按操作</span>
+  </div>
+
+  <!-- list -->
+  <div id="s8-list" style="flex:1;overflow-y:auto;padding:8px 12px 60px;display:flex;flex-direction:column;gap:0"></div>
+
+  <!-- trash FAB bottom-left -->
+  <div id="s8-trash-fab" style="position:absolute;bottom:16px;left:16px;width:44px;height:44px;border-radius:50%;background:#333355;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,0.4);z-index:5;transition:transform 0.15s">
+    <span style="font-size:20px">🗑️</span>
+    <span id="s8-trash-badge" style="position:absolute;top:-2px;right:-2px;min-width:18px;height:18px;border-radius:9px;background:#cf6679;color:#fff;font-size:10px;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 4px">0</span>
+  </div>
+
+  <!-- scrim -->
+  <div id="s8-scrim" style="position:absolute;inset:0;background:rgba(0,0,0,0.4);opacity:0;pointer-events:none;transition:opacity 0.25s;z-index:10"></div>
+
+  <!-- Bottom Sheet -->
+  <div id="s8-sheet" style="position:absolute;bottom:0;left:0;right:0;background:#2a2a48;border-radius:16px 16px 0 0;padding:0;transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);z-index:20">
+    <!-- handle -->
+    <div style="display:flex;justify-content:center;padding:10px 0 4px">
+      <div style="width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,0.2)"></div>
+    </div>
+    <!-- selected item preview -->
+    <div id="s8-sheet-title" style="padding:4px 20px 12px;font-size:14px;color:#fff;font-weight:500;border-bottom:1px solid rgba(255,255,255,0.06)"></div>
+    <!-- actions -->
+    <div style="padding:8px 0">
+      <div class="s8-action" data-act="edit" style="display:flex;align-items:center;gap:14px;padding:14px 20px;cursor:pointer">
+        <span style="font-size:18px">✏️</span>
+        <span style="font-size:14px;color:#e0e0e0">编辑</span>
+      </div>
+      <div class="s8-action" data-act="share" style="display:flex;align-items:center;gap:14px;padding:14px 20px;cursor:pointer;opacity:0.4">
+        <span style="font-size:18px">📤</span>
+        <span style="font-size:14px;color:#e0e0e0">分享</span>
+        <span style="font-size:10px;color:#888;margin-left:auto;background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:4px">待开发</span>
+      </div>
+      <div class="s8-action" data-act="archive" style="display:flex;align-items:center;gap:14px;padding:14px 20px;cursor:pointer">
+        <span style="font-size:18px">📦</span>
+        <span style="font-size:14px;color:#e0e0e0">归档</span>
+      </div>
+      <div style="margin:0 16px;border-top:1px solid rgba(255,255,255,0.06)"></div>
+      <div class="s8-action" data-act="delete" style="display:flex;align-items:center;gap:14px;padding:14px 20px;cursor:pointer">
+        <span style="font-size:18px">🗑️</span>
+        <span style="font-size:14px;color:#cf6679">删除</span>
+      </div>
+    </div>
+    <div style="height:env(safe-area-inset-bottom,16px)"></div>
+  </div>
+
+  <!-- Trash Sheet (slides up from bottom) -->
+  <div id="s8-trash-sheet" style="position:absolute;inset:0;background:#1a1a2e;transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);z-index:25;display:flex;flex-direction:column">
+    <div style="padding:16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0">
+      <span id="s8-trash-back" style="font-size:20px;cursor:pointer">←</span>
+      <span style="font-size:15px;font-weight:600;color:#fff">回收站</span>
+      <span id="s8-trash-count" style="font-size:11px;color:#888;margin-left:auto">0 项</span>
+    </div>
+    <div id="s8-trash-list" style="flex:1;overflow-y:auto;padding:8px 12px"></div>
+    <div id="s8-trash-empty" style="flex:1;display:flex;align-items:center;justify-content:center;color:#555;font-size:13px">回收站为空</div>
+  </div>
+</div>
+
+</div><!-- /inline-flex -->
+
+<script>
+(function(){
+  var data = [
+    {id:1, icon:'✈️', title:'机场值机', sub:'Airport Check-in', tag:'旅行', tagColor:'rgba(38,166,154,0.15)', tagText:'#80cbc4', status:'已生成',
+     content:'A: Good morning. I\'d like to check in for my flight to Tokyo.\nB: Good morning! May I see your passport and booking confirmation?\nA: Sure, here you go.\nB: Would you prefer a window or aisle seat?\nA: Window seat, please.\nB: Your flight departs from Gate 23. Boarding begins at 10:30.'},
+    {id:2, icon:'🍽️', title:'餐厅点餐', sub:'Restaurant Ordering', tag:'美食', tagColor:'rgba(255,167,38,0.15)', tagText:'#ffcc80', status:'草稿', content:null},
+    {id:3, icon:'🏨', title:'酒店入住', sub:'Hotel Check-in', tag:'旅行', tagColor:'rgba(38,166,154,0.15)', tagText:'#80cbc4', status:'已生成',
+     content:'A: Hi, I have a reservation under the name Boris.\nB: Welcome! Let me pull that up. Yes, a deluxe room for three nights.\nA: That\'s correct. Is early check-in available?\nB: Your room is ready. Here\'s your key card — Room 512.'},
+    {id:4, icon:'🚕', title:'打车出行', sub:'Taking a Taxi', tag:'旅行', tagColor:'rgba(38,166,154,0.15)', tagText:'#80cbc4', status:'已生成',
+     content:'A: Excuse me, could you take me to the train station?\nB: Sure, hop in. Which station?\nA: The central station, please. How long will it take?\nB: About 15 minutes, depending on traffic.'}
+  ];
+  var trash = []; // max 100
+  var sel = null, timer = null;
+
+  var list = document.getElementById('s8-list');
+  var scrim = document.getElementById('s8-scrim');
+  var sheet = document.getElementById('s8-sheet');
+  var sheetTitle = document.getElementById('s8-sheet-title');
+  var trashFab = document.getElementById('s8-trash-fab');
+  var trashBadge = document.getElementById('s8-trash-badge');
+  var trashSheet = document.getElementById('s8-trash-sheet');
+  var trashList = document.getElementById('s8-trash-list');
+  var trashEmpty = document.getElementById('s8-trash-empty');
+  var trashCount = document.getElementById('s8-trash-count');
+
+  function renderCards(){
+    list.innerHTML = '';
+    data.forEach(function(d, i){
+      var c = document.createElement('div');
+      c.style.cssText = 'background:#252540;padding:14px 12px;cursor:pointer;-webkit-touch-callout:none;user-select:none;'
+        + (i===0?'border-radius:12px 12px 0 0;':'')
+        + (i===data.length-1?'border-radius:0 0 12px 12px;':'')
+        + (i<data.length-1?'border-bottom:1px solid rgba(255,255,255,0.08);':'');
+
+      var row1 = '<div style="display:flex;align-items:center;gap:8px">'
+        + '<span style="width:24px;height:24px;border-radius:50%;background:rgba(124,77,255,0.2);color:#b39ddb;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(i+1)+'</span>'
+        + '<span style="font-size:10px;padding:2px 7px;border-radius:4px;background:'+d.tagColor+';color:'+d.tagText+';flex-shrink:0">'+d.tag+'</span>'
+        + '<span style="font-size:14px;font-weight:500;color:#fff;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+d.title+'</span>'
+        + '<span style="font-size:10px;color:#666;flex-shrink:0">'+d.status+'</span>'
+        + '</div>';
+      var row2 = '<div style="font-size:11px;color:#777;margin-top:2px;padding-left:32px">'+d.sub+'</div>';
+      var row3 = d.content
+        ? '<div style="font-size:12px;color:#aaa;margin-top:8px;padding-left:32px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line">'+d.content+'</div>'
+        : '<div style="font-size:12px;color:#555;margin-top:8px;padding-left:32px;font-style:italic">暂无内容</div>';
+      c.innerHTML = row1 + row2 + row3;
+
+      (function(el, idx){
+        el.addEventListener('pointerdown', function(){ if(sel!==null) return; timer=setTimeout(function(){ openSheet(idx); },500); });
+        el.addEventListener('pointerup', function(){ clearTimeout(timer); });
+        el.addEventListener('pointerleave', function(){ clearTimeout(timer); });
+        el.addEventListener('pointermove', function(){ clearTimeout(timer); });
+      })(c, i);
+      list.appendChild(c);
+    });
+    if(data.length===1){ list.firstChild.style.borderRadius='12px'; }
+    updateTrashBadge();
+  }
+
+  function openSheet(idx){
+    sel = idx;
+    sheetTitle.textContent = data[idx].icon + ' ' + data[idx].title;
+    scrim.style.opacity='1'; scrim.style.pointerEvents='auto';
+    sheet.style.transform='translateY(0)';
+  }
+  function closeSheet(){
+    sel = null;
+    scrim.style.opacity='0'; scrim.style.pointerEvents='none';
+    sheet.style.transform='translateY(100%)';
+  }
+  scrim.onclick = closeSheet;
+
+  // Sheet actions
+  document.querySelectorAll('.s8-action').forEach(function(el){
+    el.addEventListener('click', function(){
+      var act = this.dataset.act;
+      if(act==='share') return; // 待开发
+      if(sel===null) return;
+      var item = data[sel];
+      if(act==='delete'){
+        data.splice(sel, 1);
+        trash.unshift(item);
+        if(trash.length>100) trash.pop();
+      } else if(act==='archive'){
+        data.splice(sel, 1);
+        // 模拟归档
+      } else if(act==='edit'){
+        // 模拟编辑
+      }
+      closeSheet();
+      renderCards();
+    });
+    // hover effect (not on share)
+    if(this!==undefined && el.dataset.act!=='share'){
+      el.addEventListener('pointerenter', function(){ this.style.background='rgba(255,255,255,0.05)'; });
+      el.addEventListener('pointerleave', function(){ this.style.background='none'; });
+    }
+  });
+
+  // Trash FAB
+  function updateTrashBadge(){
+    if(trash.length>0){
+      trashBadge.style.display='flex';
+      trashBadge.textContent=trash.length;
+    } else {
+      trashBadge.style.display='none';
+    }
+  }
+  trashFab.onclick = function(){ openTrash(); };
+  trashFab.addEventListener('pointerenter', function(){ this.style.transform='scale(1.1)'; });
+  trashFab.addEventListener('pointerleave', function(){ this.style.transform='scale(1)'; });
+
+  function openTrash(){
+    trashSheet.style.transform='translateY(0)';
+    renderTrash();
+  }
+  document.getElementById('s8-trash-back').onclick = function(){
+    trashSheet.style.transform='translateY(100%)';
+  };
+
+  function renderTrash(){
+    trashCount.textContent = trash.length + ' 项';
+    trashEmpty.style.display = trash.length ? 'none' : 'flex';
+    trashList.style.display = trash.length ? 'block' : 'none';
+    trashList.innerHTML = '';
+    trash.forEach(function(t, i){
+      var r = document.createElement('div');
+      r.style.cssText = 'display:flex;align-items:center;padding:12px;border-bottom:1px solid rgba(255,255,255,0.06);gap:10px';
+      r.innerHTML =
+        '<span style="font-size:16px">'+t.icon+'</span>'
+        + '<div style="flex:1;min-width:0">'
+          + '<div style="font-size:13px;color:#ccc;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+t.title+'</div>'
+          + '<div style="font-size:11px;color:#666">'+t.tag+' · '+t.status+'</div>'
+        + '</div>'
+        + '<button style="border:none;background:rgba(124,77,255,0.15);color:#b39ddb;font-size:12px;padding:6px 14px;border-radius:8px;cursor:pointer;flex-shrink:0">恢复</button>';
+      r.querySelector('button').onclick = function(){
+        var restored = trash.splice(i, 1)[0];
+        data.push(restored);
+        renderCards();
+        renderTrash();
+      };
+      trashList.appendChild(r);
+    });
+  }
+
+  renderCards();
+})();
+</script>
+
+</section>
+
+</div><!-- /main -->
+
+<!-- ===== Scroll Spy Script ===== -->
+<script>
+(function(){
+  const main = document.getElementById('mainContent');
+  const items = document.querySelectorAll('.tree-item');
+  const sections = document.querySelectorAll('.demo-section');
+
+  // Click handling
+  items.forEach(function(item){
+    item.addEventListener('click', function(e){
+      e.preventDefault();
+      var target = document.querySelector(this.getAttribute('href'));
+      if(target) target.scrollIntoView({behavior:'smooth'});
+    });
+  });
+
+  // Scroll spy
+  function updateActive(){
+    var scrollTop = main.scrollTop;
+    var current = '';
+    sections.forEach(function(sec){
+      if(sec.offsetTop - 80 <= scrollTop){
+        current = sec.id;
+      }
+    });
+    items.forEach(function(item){
+      if(item.getAttribute('data-section') === current){
+        item.classList.add('active');
+      } else {
+        item.classList.remove('active');
+      }
+    });
+  }
+  main.addEventListener('scroll', updateActive);
+  updateActive();
+})();
+</script>
+</body>
+</html>

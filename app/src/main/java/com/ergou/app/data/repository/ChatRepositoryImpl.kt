@@ -56,6 +56,14 @@ class ChatRepositoryImpl(
         return messageId
     }
 
+    override suspend fun deleteMessage(messageId: Long) {
+        messageDao.deleteById(messageId)
+    }
+
+    override suspend fun updateMessageFeedback(messageId: Long, feedback: Int?) {
+        messageDao.updateFeedback(messageId, feedback)
+    }
+
     override fun sendMessage(sessionId: Long, userContent: String): Flow<String> = flow {
         // 构建消息历史
         val history = messageDao.getRecentMessages(sessionId, MAX_HISTORY_MESSAGES)

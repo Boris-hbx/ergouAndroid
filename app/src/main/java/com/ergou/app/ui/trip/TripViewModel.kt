@@ -309,7 +309,7 @@ class TripViewModel(
         }
     }
 
-    fun addItem(tripId: String, type: String, description: String, amount: Double, date: String?, reimburseStatus: String? = null, notes: String? = null, currency: String? = null) {
+    fun addItem(tripId: String, type: String, description: String, amount: Double, date: String?, reimburseStatus: String? = null, notes: String? = null, currency: String? = null, pendingPhotos: List<android.net.Uri> = emptyList(), context: android.content.Context? = null) {
         viewModelScope.launch {
             val result = nextApiService.createTripItem(
                 tripId,
@@ -324,8 +324,13 @@ class TripViewModel(
                 )
             )
             result.fold(
-                onSuccess = {
+                onSuccess = { newItem ->
                     Timber.d("[Trip] 添加费用成功 tripId=%s type=%s", tripId, type)
+                    if (pendingPhotos.isNotEmpty() && context != null) {
+                        for (uri in pendingPhotos) {
+                            uploadItemPhoto(newItem.id, uri, context)
+                        }
+                    }
                     selectTrip(tripId)
                 },
                 onFailure = { e ->
@@ -547,10 +552,92 @@ class TripViewModel(
         }
     }
 
+    // ── Receipt Analysis ──
+
+    private val _analysisState = MutableStateFlow(ReceiptAnalysisState())
+    val analysisState: StateFlow<ReceiptAnalysisState> = _analysisState
+
+    fun analyzeReceipt(photoBytes: List<ByteArray>, text: String?) {
+        if (photoBytes.isEmpty() && text.isNullOrBlank()) return
+        viewModelScope.launch {
+            _analysisState.value = ReceiptAnalysisState(isAnalyzing = true)
+            try {
+                val base64Images = photoBytes.map { bytes ->
+                    android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
+                }
+                if (base64Images.isEmpty() && text.isNullOrBlank()) {
+                    _analysisState.value = ReceiptAnalysisState(error = "无法读取照片")
+                    return@launch
+                }
+                val result = nextApiService.parseReceiptPreview(images = base64Images, text = text)
+                result.fold(
+                    onSuccess = { preview ->
+                        _analysisState.value = ReceiptAnalysisState(preview = preview)
+                        Timber.d("[Trip] 票据分析成功 merchant=%s amount=%.2f", preview.merchant, preview.totalAmount)
+                    },
+                    onFailure = { e ->
+                        Timber.e(e, "[Trip] 票据分析失败")
+                        _analysisState.value = ReceiptAnalysisState(
+                            error = if (e.message?.contains("timeout", ignoreCase = true) == true) "分析超时，请手动输入" else "分析失败：${e.message}"
+                        )
+                    }
+                )
+            } catch (e: Exception) {
+                Timber.e(e, "[Trip] 票据分析异常")
+                _analysisState.value = ReceiptAnalysisState(error = "照片处理失败")
+            }
+        }
+    }
+
+    fun clearAnalysis() {
+        _analysisState.value = ReceiptAnalysisState()
+    }
+
+    private fun openStream(context: android.content.Context, uri: Uri): java.io.InputStream? {
+        return if (uri.scheme == "file") {
+            uri.path?.let { java.io.FileInputStream(it) }
+        } else {
+            context.contentResolver.openInputStream(uri)
+        }
+    }
+
+    private fun compressImage(context: android.content.Context, uri: Uri, maxDim: Int = 1920, quality: Int = 80): ByteArray? {
+        Timber.d("[Trip] compressImage uri=%s", uri)
+        val options = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        val opened = openStream(context, uri)
+        if (opened == null) {
+            Timber.w("[Trip] openStream returned null for uri=%s", uri)
+            return null
+        }
+        opened.use { stream ->
+            android.graphics.BitmapFactory.decodeStream(stream, null, options)
+        }
+        val width = options.outWidth
+        val height = options.outHeight
+        if (width <= 0 || height <= 0) return null
+        var sampleSize = 1
+        val maxSide = maxOf(width, height)
+        if (maxSide > maxDim) sampleSize = maxSide / maxDim
+        val decodeOptions = android.graphics.BitmapFactory.Options().apply { inSampleSize = sampleSize }
+        val bitmap = openStream(context, uri)?.use { stream ->
+            android.graphics.BitmapFactory.decodeStream(stream, null, decodeOptions)
+        } ?: return null
+        val output = java.io.ByteArrayOutputStream()
+        bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, quality, output)
+        bitmap.recycle()
+        return output.toByteArray()
+    }
+
     fun clearError() {
         _uiState.value = _uiState.value.copy(error = null)
     }
 }
+
+data class ReceiptAnalysisState(
+    val isAnalyzing: Boolean = false,
+    val preview: com.ergou.app.data.remote.dto.NextParsePreview? = null,
+    val error: String? = null
+)
 
 data class SnackbarEvent(
     val message: String,

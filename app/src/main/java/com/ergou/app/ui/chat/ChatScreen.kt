@@ -1,7 +1,12 @@
 package com.ergou.app.ui.chat
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,38 +15,46 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.ThumbDown
+import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.outlined.ThumbDown
+import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -51,12 +64,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import com.ergou.app.data.local.entity.MessageEntity
-import com.ergou.app.data.local.entity.SessionEntity
+import com.ergou.app.data.repository.ShortcutItem
 import com.ergou.app.ui.components.MarkdownText
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -65,64 +81,65 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun ChatScreen(
     onNavigateToSettings: () -> Unit = {},
+    onNavigateToFeature: (String) -> Unit = {},
+    onNavigateToSessionHistory: () -> Unit = {},
+    onNavigateToFeatureHub: () -> Unit = {},
     viewModel: ChatViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val shortcuts by viewModel.shortcuts.collectAsState()
+    val isEditingShortcuts by viewModel.isEditingShortcuts.collectAsState()
     var showApiKeyDialog by remember { mutableStateOf(false) }
-    val drawerState = rememberDrawerState(DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
 
-    // 首次启动且没有 API Key 时弹出设置（null=加载中，不弹）
     LaunchedEffect(uiState.isApiKeySet) {
         if (uiState.isApiKeySet == false) {
             showApiKeyDialog = true
         }
     }
 
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            SessionDrawer(
-                sessions = uiState.sessions,
-                currentSessionId = uiState.currentSessionId,
-                onNewSession = {
-                    viewModel.onNewSession()
-                    scope.launch { drawerState.close() }
-                },
-                onSelectSession = { id ->
-                    viewModel.onSwitchSession(id)
-                    scope.launch { drawerState.close() }
-                },
-                onDeleteSession = viewModel::onDeleteSession,
-                onApiKeySettings = { showApiKeyDialog = true }
-            )
-        }
-    ) {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("二狗") },
-                    navigationIcon = {
-                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(Icons.Default.Menu, contentDescription = "会话列表")
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = onNavigateToSettings) {
-                            Icon(Icons.Default.Settings, contentDescription = "设置")
-                        }
+    // 刷新快捷栏待办计数
+    LaunchedEffect(Unit) {
+        viewModel.refreshShortcutBadges()
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("二狗") },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateToFeatureHub) {
+                        Icon(Icons.Default.Menu, contentDescription = "功能广场")
                     }
-                )
-            }
-        ) { padding ->
-            ChatContent(
-                uiState = uiState,
-                onInputChanged = viewModel::onInputChanged,
-                onSend = viewModel::onSendMessage,
-                onDismissError = viewModel::dismissError,
-                modifier = Modifier.padding(padding)
+                },
+                actions = {
+                    IconButton(onClick = onNavigateToSessionHistory) {
+                        Icon(Icons.Default.History, contentDescription = "历史会话")
+                    }
+                    IconButton(onClick = onNavigateToSettings) {
+                        Icon(Icons.Default.Settings, contentDescription = "设置")
+                    }
+                }
             )
         }
+    ) { padding ->
+        ChatContent(
+            uiState = uiState,
+            shortcuts = shortcuts,
+            isEditingShortcuts = isEditingShortcuts,
+            onSend = viewModel::onSendMessage,
+            onStop = viewModel::cancelStreaming,
+            onRegenerate = viewModel::regenerateLastMessage,
+            onFeedback = viewModel::onMessageFeedback,
+            onDismissError = viewModel::dismissError,
+            onShortcutClick = { route ->
+                viewModel.recordShortcutUsage(route)
+                onNavigateToFeature(route)
+            },
+            onEnterShortcutEdit = viewModel::enterShortcutEditMode,
+            onExitShortcutEdit = viewModel::exitShortcutEditMode,
+            onTogglePin = viewModel::togglePin,
+            modifier = Modifier.padding(padding)
+        )
     }
 
     if (showApiKeyDialog) {
@@ -139,133 +156,306 @@ fun ChatScreen(
 @Composable
 fun ChatContent(
     uiState: ChatUiState,
-    onInputChanged: (String) -> Unit,
-    onSend: () -> Unit,
+    shortcuts: List<ShortcutItem>,
+    isEditingShortcuts: Boolean,
+    onSend: (String) -> Unit,
+    onStop: () -> Unit,
+    onRegenerate: () -> Unit,
+    onFeedback: (Long, Int?) -> Unit,
     onDismissError: () -> Unit,
+    onShortcutClick: (String) -> Unit,
+    onEnterShortcutEdit: () -> Unit,
+    onExitShortcutEdit: () -> Unit,
+    onTogglePin: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val listState = rememberLazyListState()
+    val clipboardManager = LocalClipboardManager.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
-    // 有新消息或流式内容时滚动到底部
-    val totalItems = uiState.messages.size + if (uiState.streamingContent.isNotEmpty()) 1 else 0
-    LaunchedEffect(totalItems, uiState.streamingContent) {
-        if (totalItems > 0) {
-            listState.animateScrollToItem(totalItems - 1)
+    // Calculate actual LazyColumn item count for correct scroll position
+    val hasWelcome = uiState.messages.isEmpty() && uiState.streamingContent.isEmpty()
+    val hasSuggestions = uiState.suggestions.isNotEmpty() && !uiState.isSending
+    val hasStreaming = uiState.streamingContent.isNotEmpty()
+    val hasLoading = uiState.isSending && uiState.streamingContent.isEmpty()
+    val lazyItemCount = 1 + // top spacer
+        (if (hasWelcome) 1 else 0) +
+        uiState.messages.size +
+        (if (hasSuggestions) 1 else 0) +
+        (if (hasStreaming) 1 else 0) +
+        (if (hasLoading) 1 else 0) +
+        1 // bottom spacer
+    LaunchedEffect(lazyItemCount, uiState.streamingContent) {
+        if (lazyItemCount > 2) {
+            listState.animateScrollToItem(lazyItemCount - 1)
         }
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .imePadding()
-    ) {
-        // 消息列表
-        LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            item { Spacer(modifier = Modifier.height(8.dp)) }
+    val lastAssistantId = remember(uiState.messages) {
+        uiState.messages.lastOrNull { it.role == "assistant" }?.id
+    }
 
-            // 空状态
-            if (uiState.messages.isEmpty() && uiState.streamingContent.isEmpty()) {
-                item { WelcomeMessage() }
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            // 消息列表（用 Box 包裹以支持编辑模式下的透明遮罩）
+            Box(modifier = Modifier.weight(1f)) {
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                item { Spacer(modifier = Modifier.height(8.dp)) }
+
+                // 空状态
+                if (uiState.messages.isEmpty() && uiState.streamingContent.isEmpty()) {
+                    item {
+                        WelcomeMessage(
+                            suggestions = uiState.welcomeSuggestions,
+                            onSend = onSend
+                        )
+                    }
+                }
+
+                // 历史消息
+                items(uiState.messages, key = { it.id }) { message ->
+                    if (message.role != "system") {
+                        MessageBubble(
+                            content = message.content,
+                            isFromUser = message.role == "user",
+                            isLastAssistantMessage = message.id == lastAssistantId,
+                            isSending = uiState.isSending,
+                            feedback = message.feedback,
+                            onCopy = if (message.role == "assistant") {
+                                {
+                                    clipboardManager.setText(AnnotatedString(message.content))
+                                    scope.launch { snackbarHostState.showSnackbar("已复制") }
+                                }
+                            } else null,
+                            onFeedback = if (message.role == "assistant") {
+                                { value -> onFeedback(message.id, value) }
+                            } else null,
+                            onRegenerate = if (message.id == lastAssistantId && !uiState.isSending) {
+                                onRegenerate
+                            } else null
+                        )
+                    }
+                }
+
+                // 建议追问
+                if (uiState.suggestions.isNotEmpty() && !uiState.isSending) {
+                    item {
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(uiState.suggestions.size) { index ->
+                                SuggestionChip(
+                                    onClick = { onSend(uiState.suggestions[index]) },
+                                    label = { Text(uiState.suggestions[index]) }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // 流式输出中的消息
+                if (uiState.streamingContent.isNotEmpty()) {
+                    item {
+                        val displayContent = uiState.streamingContent
+                            .replace(Regex("""\[SAVE_MEMORY:\w+:.+?]"""), "")
+                            .replace(Regex("""\[SAVE_PERSON:.+?:.+?:.+?]"""), "")
+                            .trim()
+                        if (displayContent.isNotEmpty()) {
+                            MessageBubble(
+                                content = displayContent,
+                                isFromUser = false,
+                                isLastAssistantMessage = false,
+                                isSending = true,
+                                onCopy = null,
+                                onRegenerate = null
+                            )
+                        }
+                    }
+                }
+
+                // 加载中
+                if (uiState.isSending && uiState.streamingContent.isEmpty()) {
+                    item { LoadingIndicator() }
+                }
+
+                item { Spacer(modifier = Modifier.height(8.dp)) }
             }
 
-            // 历史消息
-            items(uiState.messages, key = { it.id }) { message ->
-                if (message.role != "system") {
-                    MessageBubble(
-                        content = message.content,
-                        isFromUser = message.role == "user"
-                    )
+            // 编辑模式下的透明遮罩：点击退出编辑
+            if (isEditingShortcuts) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) { onExitShortcutEdit() }
+                )
+            }
+            } // Box wrapper end
+
+            // 错误提示
+            uiState.error?.let { error ->
+                Snackbar(
+                    modifier = Modifier.padding(16.dp),
+                    action = {
+                        TextButton(onClick = onDismissError) {
+                            Text("关闭")
+                        }
+                    }
+                ) {
+                    Text(error)
                 }
             }
 
-            // 流式输出中的消息
-            if (uiState.streamingContent.isNotEmpty()) {
-                item {
-                    // 流式显示时隐藏记忆指令标记
-                    val displayContent = uiState.streamingContent
-                        .replace(Regex("""\[SAVE_MEMORY:\w+:.+?]"""), "")
-                        .replace(Regex("""\[SAVE_PERSON:.+?:.+?:.+?]"""), "")
-                        .trim()
-                    if (displayContent.isNotEmpty()) {
-                        MessageBubble(
-                            content = displayContent,
-                            isFromUser = false
+            // 快捷条
+            ShortcutBar(
+                shortcuts = shortcuts,
+                isEditing = isEditingShortcuts,
+                pinnedCount = shortcuts.count { it.pinned },
+                onClick = onShortcutClick,
+                onLongPress = onEnterShortcutEdit,
+                onTogglePin = onTogglePin
+            )
+
+            // 输入框
+            var textFieldValue by remember { mutableStateOf(TextFieldValue()) }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedTextField(
+                    value = textFieldValue,
+                    onValueChange = { textFieldValue = it },
+                    modifier = Modifier.weight(1f),
+                    placeholder = { Text("说点什么...") },
+                    maxLines = 4,
+                    shape = RoundedCornerShape(24.dp),
+                    enabled = !uiState.isSending
+                )
+                if (uiState.isSending) {
+                    IconButton(onClick = onStop) {
+                        Icon(
+                            Icons.Filled.Stop,
+                            contentDescription = "停止",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                } else {
+                    IconButton(
+                        onClick = {
+                            onSend(textFieldValue.text)
+                            textFieldValue = TextFieldValue()
+                        },
+                        enabled = textFieldValue.text.isNotBlank()
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.Send,
+                            contentDescription = "发送"
                         )
                     }
                 }
             }
-
-            // 加载中
-            if (uiState.isSending && uiState.streamingContent.isEmpty()) {
-                item { LoadingIndicator() }
-            }
-
-            item { Spacer(modifier = Modifier.height(8.dp)) }
         }
 
-        // 错误提示
-        uiState.error?.let { error ->
-            Snackbar(
-                modifier = Modifier.padding(16.dp),
-                action = {
-                    TextButton(onClick = onDismissError) {
-                        Text("关闭")
-                    }
-                }
-            ) {
-                Text(error)
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun ShortcutBar(
+    shortcuts: List<ShortcutItem>,
+    isEditing: Boolean,
+    pinnedCount: Int,
+    onClick: (String) -> Unit,
+    onLongPress: () -> Unit,
+    onTogglePin: (String) -> Unit
+) {
+    val haptic = LocalHapticFeedback.current
+
+    LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(shortcuts, key = { it.route }) { item ->
+            val displayLabel = if (!isEditing && item.badge != null) {
+                "${item.label} ${item.badge}"
+            } else {
+                item.label
             }
-        }
 
-        // 输入框 — 用 TextFieldValue 本地管理，避免 IME 中文输入被 StateFlow 打断
-        var textFieldValue by remember { mutableStateOf(TextFieldValue()) }
-
-        // ViewModel 清空输入时同步（发送后）
-        LaunchedEffect(uiState.inputText) {
-            if (uiState.inputText.isEmpty() && textFieldValue.text.isNotEmpty()) {
-                textFieldValue = TextFieldValue()
-            }
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            OutlinedTextField(
-                value = textFieldValue,
-                onValueChange = { newValue ->
-                    textFieldValue = newValue
-                    onInputChanged(newValue.text)
-                },
-                modifier = Modifier.weight(1f),
-                placeholder = { Text("说点什么...") },
-                maxLines = 4,
-                shape = RoundedCornerShape(24.dp)
-            )
-            IconButton(
-                onClick = onSend,
-                enabled = textFieldValue.text.isNotBlank() && !uiState.isSending
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.Send,
-                    contentDescription = "发送"
+            if (isEditing) {
+                val canPin = item.pinned || pinnedCount < ChatViewModel.MAX_PINNED
+                val rotation by animateFloatAsState(
+                    targetValue = if (item.pinned) 0f else 45f,
+                    label = "pinRotation"
                 )
+                FilterChip(
+                    selected = item.pinned,
+                    onClick = { onTogglePin(item.route) },
+                    enabled = canPin,
+                    label = { Text(displayLabel) },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Filled.PushPin,
+                            contentDescription = if (item.pinned) "已固定" else "未固定",
+                            modifier = Modifier
+                                .size(16.dp)
+                                .graphicsLayer { rotationZ = rotation }
+                        )
+                    }
+                )
+            } else {
+                Surface(
+                    modifier = Modifier.combinedClickable(
+                        onClick = { onClick(item.route) },
+                        onLongClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onLongPress()
+                        }
+                    ),
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
+                ) {
+                    Text(
+                        displayLabel,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun WelcomeMessage() {
+fun WelcomeMessage(
+    suggestions: List<String> = emptyList(),
+    onSend: (String) -> Unit = {}
+) {
+    val greeting = "善谋者胜，善行者成。"
+
+    val displaySuggestions = suggestions.ifEmpty {
+        listOf("查看今日待办", "帮我记一笔账", "聊聊最近怎么样")
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -279,10 +469,22 @@ fun WelcomeMessage() {
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "善谋者胜，善行者成。",
+            text = greeting,
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+        Spacer(modifier = Modifier.height(24.dp))
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            displaySuggestions.forEach { topic ->
+                SuggestionChip(
+                    onClick = { onSend(topic) },
+                    label = { Text(topic) }
+                )
+            }
+        }
     }
 }
 
@@ -316,10 +518,19 @@ fun LoadingIndicator() {
 }
 
 @Composable
-fun MessageBubble(content: String, isFromUser: Boolean) {
-    Row(
+fun MessageBubble(
+    content: String,
+    isFromUser: Boolean,
+    isLastAssistantMessage: Boolean = false,
+    isSending: Boolean = false,
+    feedback: Int? = null,
+    onCopy: (() -> Unit)? = null,
+    onFeedback: ((Int?) -> Unit)? = null,
+    onRegenerate: (() -> Unit)? = null
+) {
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = if (isFromUser) Arrangement.End else Arrangement.Start
+        horizontalAlignment = if (isFromUser) Alignment.End else Alignment.Start
     ) {
         Box(
             modifier = Modifier
@@ -349,106 +560,60 @@ fun MessageBubble(content: String, isFromUser: Boolean) {
                 MarkdownText(text = content, color = textColor)
             }
         }
-    }
-}
 
-@Composable
-fun SessionDrawer(
-    sessions: List<SessionEntity>,
-    currentSessionId: Long?,
-    onNewSession: () -> Unit,
-    onSelectSession: (Long) -> Unit,
-    onDeleteSession: (Long) -> Unit,
-    onApiKeySettings: () -> Unit = {}
-) {
-    ModalDrawerSheet {
-        Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        // AI 消息操作栏
+        if (!isFromUser && !isSending) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.padding(start = 4.dp, top = 2.dp),
+                horizontalArrangement = Arrangement.spacedBy(0.dp)
             ) {
-                Text(
-                    text = "会话",
-                    style = MaterialTheme.typography.titleLarge
-                )
-                IconButton(onClick = onNewSession) {
-                    Icon(Icons.Default.Add, contentDescription = "新对话")
+                if (onCopy != null) {
+                    IconButton(onClick = onCopy, modifier = Modifier.size(32.dp)) {
+                        Icon(
+                            Icons.Filled.ContentCopy,
+                            contentDescription = "复制",
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                if (onFeedback != null) {
+                    IconButton(
+                        onClick = { onFeedback(if (feedback == 1) null else 1) },
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            if (feedback == 1) Icons.Filled.ThumbUp else Icons.Outlined.ThumbUp,
+                            contentDescription = "点赞",
+                            modifier = Modifier.size(16.dp),
+                            tint = if (feedback == 1) MaterialTheme.colorScheme.primary
+                                   else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    IconButton(
+                        onClick = { onFeedback(if (feedback == -1) null else -1) },
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            if (feedback == -1) Icons.Filled.ThumbDown else Icons.Outlined.ThumbDown,
+                            contentDescription = "点踩",
+                            modifier = Modifier.size(16.dp),
+                            tint = if (feedback == -1) MaterialTheme.colorScheme.error
+                                   else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                if (onRegenerate != null) {
+                    IconButton(onClick = onRegenerate, modifier = Modifier.size(32.dp)) {
+                        Icon(
+                            Icons.Filled.Refresh,
+                            contentDescription = "重新生成",
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
-
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-            if (sessions.isEmpty()) {
-                Text(
-                    text = "还没有对话",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(vertical = 16.dp)
-                )
-            }
-
-            LazyColumn(modifier = Modifier.weight(1f)) {
-                items(sessions, key = { it.id }) { session ->
-                    SessionItem(
-                        session = session,
-                        isSelected = session.id == currentSessionId,
-                        onClick = { onSelectSession(session.id) },
-                        onDelete = { onDeleteSession(session.id) }
-                    )
-                }
-            }
-
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-            TextButton(
-                onClick = onApiKeySettings,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(Icons.Default.Settings, contentDescription = null, modifier = Modifier.size(16.dp))
-                Text("  API Key 设置")
-            }
-        }
-    }
-}
-
-@Composable
-fun SessionItem(
-    session: SessionEntity,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    onDelete: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                if (isSelected) MaterialTheme.colorScheme.secondaryContainer
-                else MaterialTheme.colorScheme.surface,
-                RoundedCornerShape(8.dp)
-            )
-            .clickable(onClick = onClick)
-            .padding(12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = session.title,
-            style = MaterialTheme.typography.bodyLarge,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f)
-        )
-        IconButton(
-            onClick = onDelete,
-            modifier = Modifier.size(24.dp)
-        ) {
-            Icon(
-                Icons.Default.Delete,
-                contentDescription = "删除",
-                modifier = Modifier.size(16.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     }
 }

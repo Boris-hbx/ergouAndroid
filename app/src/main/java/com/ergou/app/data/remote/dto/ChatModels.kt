@@ -74,7 +74,22 @@ data class MessageResponse(
 @Serializable
 data class Delta(
     val role: String? = null,
-    val content: String? = null
+    val content: String? = null,
+    @SerialName("tool_calls") val toolCalls: List<DeltaToolCall>? = null
+)
+
+@Serializable
+data class DeltaToolCall(
+    val index: Int = 0,
+    val id: String? = null,
+    val type: String? = null,
+    val function: DeltaFunctionCall? = null
+)
+
+@Serializable
+data class DeltaFunctionCall(
+    val name: String? = null,
+    val arguments: String? = null
 )
 
 @Serializable
